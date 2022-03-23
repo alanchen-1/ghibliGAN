@@ -15,6 +15,9 @@ def create_padding(padding : str):
         return False, None
 
 class ResNetBlock(nn.Module):
+    """
+    Class defining the building block of a residual (skip connection) convolutional network.
+    """
     def __init__(self,
     dimension : int,
     dropout : bool,
@@ -22,6 +25,16 @@ class ResNetBlock(nn.Module):
     norm : str = 'instance',
     padding : str = 'reflect',
     kernel_size : int = 3):
+        """
+        Constructor for ResNetBlock.
+            Parameters:
+                dimension (int) : dimension of the convolutional layers
+                dropuout (bool) : whether to use Dropout layers or not
+                bias (bool) : whether to use bias in the convolutional layers or not
+                norm (str) : normalization layer, default = 'instance'
+                padding (str) : padding to use, helps reduce artifacts, default = 'reflect'
+                kernel_size (int) : kernel size to use, default = 3
+        """
         super(ResNetBlock, self).__init__()
         block = []
 
@@ -55,28 +68,54 @@ class ResNetBlock(nn.Module):
         self.res_block = nn.Sequential(*block)
 
     def forward(self, x):
+        """
+        Forward method for block. Adds identity skip connection.
+            Parameters:
+                x (tensor) : input into network
+            Returns:
+                output : output of network
+        """
         output = self.res_block(x) + x # add skip connection
         return output
     
 class ResNetGenerator(nn.Module):
+    """
+    Class defining a Residual-based Generator with multiple residual convolutional blocks.
+    """
     def __init__(self,
     in_channels : int,
     out_channels : int,
     num_filters : int = 64,
     num_blocks : int = 6,
     num_sampling : int = 2,
-    norm_layer : nn.Module = nn.InstanceNorm2d,
+    norm : str = 'instance',
     padding : str = 'reflect',
     use_dropout : bool = False):
+        """
+        Constructor for Residual Generator. 
+            Parameters:
+                in_channels (int) : number of channels in the input
+                out_channels (int) : number of channels in the output
+                num_filters (int) : number of filters in initial and last Convolutional layer, default = 64
+                num_blocks (int) : number of ResNetBlocks to use, default = 6
+                num_sampling (int) : number of intermediate downsampling and upsampling layers, default = 2
+                norm (str) : normalization layer, default = 'instance'
+                padding (str) : padding layer to use, default = 'reflect'
+                use_dropout (bool) : whether to use Dropout layers in the ResNetBlocks
+        """
         super(ResNetGenerator, self).__init__()
+        # create norm layer
+        norm_layer = create_norm(norm)
         use_bias = norm_layer == nn.InstanceNorm2d
-        # 7x7 conv instnace relu w/ 64 filters
+
+        # 7x7 conv-instance-relu w/ 64 filters
         block = [nn.ReflectionPad2d(3),
         nn.Conv2d(in_channels, num_filters, kernel_size=7, stride=1, padding=0, bias=use_bias),
         norm_layer(num_filters),
         nn.ReLU(True)]
 
         # add downsampling layers
+        # kernel size 3
         down_in_features = num_filters
         down_out_features = num_filters
         for _ in range(num_sampling):
@@ -92,6 +131,7 @@ class ResNetGenerator(nn.Module):
             block.append(ResNetBlock(block_dimension, dropout=use_dropout, padding=padding, bias=use_bias))
 
         # add upscaling layers
+        # kernel size 3
         up_in_features = block_dimension
         up_out_features = block_dimension
         for _ in range(num_sampling):
@@ -101,6 +141,7 @@ class ResNetGenerator(nn.Module):
             nn.ReLU(True)]
             up_in_features = up_out_features
 
+        # add final layers, output on Tanh
         block += [nn.ReflectionPad2d(3),
         nn.Conv2d(num_filters, out_channels, kernel_size=7, padding=0),
         nn.Tanh()]
@@ -108,6 +149,13 @@ class ResNetGenerator(nn.Module):
         self.model = nn.Sequential(*block)
     
     def forward(self, x):
+        """
+        Forward method for Residual Generator network.
+            Parameters:
+                x (tensor) : input into network
+            Output: 
+                output : output of the network
+        """
         output = self.model(x)
         return output
 
