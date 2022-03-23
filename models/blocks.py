@@ -1,7 +1,4 @@
-from msilib.schema import Patch
-import torch
 import torch.nn as nn
-
 
 def create_norm(norm : str):
     if norm == 'instance':
@@ -11,7 +8,9 @@ def create_norm(norm : str):
 
 def create_padding(padding : str):
     if padding == 'reflect':
-        return True, nn.ReflectionPad2d
+        return False, nn.ReflectionPad2d
+    elif padding == 'ones':
+        return True, None
     else:
         return False, None
 
@@ -24,22 +23,14 @@ class ResNetBlock(nn.Module):
     padding : str = 'reflect',
     kernel_size : int = 3):
         super(ResNetBlock, self).__init__()
-        self.main_block = self.construct_block(dimension, dropout, bias, norm, padding, kernel_size)
-
-    def construct_block(self, 
-    dimension : int,
-    dropout : bool,
-    bias : bool,
-    norm : str,
-    padding : str,
-    kernel_size : int) -> nn.ModuleList():
-        block = nn.ModuleList()
+        block = []
 
         # padding layer (if included at all)
-        has_padding, padding_layer = create_padding(padding)                
-        if has_padding:
+        ones_padding, padding_layer = create_padding(padding)                
+        pad_value = (1 if ones_padding else 0)
+
+        if padding_layer != None: 
             block.append(padding_layer(1))
-        pad_value = (1 if has_padding else 0)
 
         # norm layer
         norm_layer = create_norm(norm)
@@ -54,22 +45,72 @@ class ResNetBlock(nn.Module):
         if dropout:
             block.append(nn.Dropout(p=0.5))
 
-        if has_padding:
+        if padding_layer != None:
             block.append(padding_layer(1))
 
         block.extend(
             [nn.Conv2d(dimension, dimension, kernel_size=kernel_size, padding=pad_value, bias=bias), 
             norm_layer(dimension)])
 
-        return block
+        self.res_block = nn.Sequential(*block)
 
     def forward(self, x):
-        output = x
-        for layer in self.main_block:
-            output = layer(output)
-        output += x # add skip connection
+        output = self.res_block(x) + x # add skip connection
         return output
     
+class ResNetGenerator(nn.Module):
+    def __init__(self,
+    in_channels : int,
+    out_channels : int,
+    num_filters : int = 64,
+    num_blocks : int = 6,
+    num_sampling : int = 2,
+    norm_layer : nn.Module = nn.InstanceNorm2d,
+    padding : str = 'reflect',
+    use_dropout : bool = False):
+        super(ResNetGenerator, self).__init__()
+        use_bias = norm_layer == nn.InstanceNorm2d
+        # 7x7 conv instnace relu w/ 64 filters
+        block = [nn.ReflectionPad2d(3),
+        nn.Conv2d(in_channels, num_filters, kernel_size=7, stride=1, padding=0, bias=use_bias),
+        norm_layer(num_filters),
+        nn.ReLU(True)]
+
+        # add downsampling layers
+        down_in_features = num_filters
+        down_out_features = num_filters
+        for _ in range(num_sampling):
+            down_out_features *= 2
+            block += [nn.Conv2d(down_in_features, down_out_features, kernel_size=3, stride=2, padding=1, bias=use_bias),
+            norm_layer(down_out_features), 
+            nn.ReLU(True)]
+            down_in_features = down_out_features
+            
+        # add ResBlocks
+        block_dimension = down_out_features
+        for _ in range(num_blocks):
+            block.append(ResNetBlock(block_dimension, dropout=use_dropout, padding=padding, bias=use_bias))
+
+        # add upscaling layers
+        up_in_features = block_dimension
+        up_out_features = block_dimension
+        for _ in range(num_sampling):
+            up_out_features = int(up_out_features/2)
+            block += [nn.ConvTranspose2d(up_in_features, up_out_features, kernel_size=3, stride=2, padding=1, output_padding=1, bias=use_bias),
+            norm_layer(int(up_out_features)), 
+            nn.ReLU(True)]
+            up_in_features = up_out_features
+
+        block += [nn.ReflectionPad2d(3),
+        nn.Conv2d(num_filters, out_channels, kernel_size=7, padding=0),
+        nn.Tanh()]
+
+        self.model = nn.Sequential(*block)
+    
+    def forward(self, x):
+        output = self.model(x)
+        return output
+
 # UNET Architecture
 """
 class DownsampleBlock(nn.Module): 
@@ -94,8 +135,13 @@ class PatchDiscriminator(nn.Module):
     """
     Class to define a PatchGAN discriminator.
     """
-    def __init__(self, num_channels : int,
-    num_filters : int=64, num_conv_layers : int=3, norm_layer=nn.InstanceNorm2d, ker_size : int=4, padding : int=1):
+    def __init__(self,
+    num_channels : int,
+    num_filters : int = 64,
+    num_conv_layers : int = 3,
+    norm_layer : nn.Module = nn.InstanceNorm2d,
+    ker_size : int = 4,
+    padding : int = 1):
         """
         Constructor for PatchGAN discriminator.
             Parameters:
@@ -128,8 +174,7 @@ class PatchDiscriminator(nn.Module):
 
             block += [
                 norm_layer(out_filters),
-                nn.LeakyReLU(0.2, True)
-            ]
+                nn.LeakyReLU(0.2, True)]
             in_filters = out_filters
         
         # output layer = 1 channel
@@ -148,8 +193,11 @@ class PatchDiscriminator(nn.Module):
         return output
 
 # test stuff
-testNet = ResNetBlock(64, dropout=False, bias=True, norm='instance')
-print(testNet)
+#testNet = ResNetBlock(64, dropout=False, bias=True, norm='instance')
+#print(testNet)
 
-testD = PatchDiscriminator(3)
-print(testD)
+#testD = PatchDiscriminator(3)
+#print(testD)
+
+#testG = ResNetGenerator(3, 3)
+#print(testG)
