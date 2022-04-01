@@ -1,18 +1,8 @@
+import sys
+sys.path.append('..')
+from utils.str_to_layer import *
+
 import torch.nn as nn
-
-def create_norm(norm : str):
-    if norm == 'instance':
-        return nn.InstanceNorm2d
-    elif norm == 'batch':
-        return nn.BatchNorm2d
-
-def create_padding(padding : str):
-    if padding == 'reflect':
-        return False, nn.ReflectionPad2d
-    elif padding == 'ones':
-        return True, None
-    else:
-        return False, None
 
 class ResNetBlock(nn.Module):
     """
@@ -241,8 +231,8 @@ class PatchDiscriminator(nn.Module):
         return output
 
 # test stuff
-#testNet = ResNetBlock(64, dropout=False, bias=True, norm='instance')
-#print(testNet)
+testNet = ResNetBlock(64, dropout=False, bias=True, norm='instance')
+print(testNet)
 
 #testD = PatchDiscriminator(3)
 #print(testD)
