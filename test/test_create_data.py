@@ -1,6 +1,6 @@
 import sys
 sys.path.append('..')
-from data.create_data import get_video_alias
+from data.scenes import get_video_alias
 import unittest
 
 class TestCreateData(unittest.TestCase):

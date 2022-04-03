@@ -3,6 +3,7 @@ sys.path.append('..')
 import torch
 import torch.nn as nn
 from torch.nn import init
+from torch.optim import lr_scheduler
 from blocks import ResNetGenerator, PatchDiscriminator
 from utils.str_to_layer import create_norm
 
@@ -14,6 +15,8 @@ def init_params(network : nn.Module, type : str, scale : float):
             init.xavier_normal_(network.weight.data, gain=scale)
         elif type == 'kaiming':
             init.kaiming_normal_(model.weight.data)
+        else:
+            raise NotImplementedError(f'{type} initialization not implemented')
         
         # init bias to 0
         if hasattr(model, 'bias'):
@@ -73,3 +76,12 @@ def init_patch_discriminator(in_channels : int, num_filters : int = 64, num_conv
     norm_layer = create_norm(norm)
     net = PatchDiscriminator(in_channels, num_filters, num_conv_layers, norm_layer)
     return init_model(net, use_gpu=use_gpu, init_type=init_type, init_scale=init_scale)
+
+def init_linear_lr(optimizer : torch.optim, start_epoch : int, warmup_epochs : int, decay_epochs : int):
+    """
+    Simple linear learning rate scheduler.
+    """
+    def rule(epoch : int):
+        return 1.0 - max(0.0, (start_epoch + epoch - warmup_epochs)) / float(decay_epochs)
+    lr_schedule = lr_scheduler.LambdaLR(optimizer, rule)
+    return lr_schedule

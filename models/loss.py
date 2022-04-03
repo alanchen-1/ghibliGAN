@@ -10,7 +10,7 @@ class Loss(nn.Module):
     """
     Set up callable Loss class.
     """
-    def __init__(self, type = 'mse', real_label = 1.0, fake_label = 0.0):
+    def __init__(self, loss_type = 'mse', real_label = 1.0, fake_label = 0.0):
         """
         Constructor for Loss class.
             Parameters:
@@ -21,10 +21,10 @@ class Loss(nn.Module):
         super(Loss, self).__init__()
         self.register_buffer('real_label', torch.tensor(real_label))
         self.register_buffer('fake_label', torch.tensor(fake_label))
-        self.type = type
-        if type == 'mse':
+        self.loss_type = loss_type
+        if loss_type == 'mse':
             self.loss = nn.MSELoss()
-        elif type == 'bce':
+        elif loss_type == 'bce':
             self.loss = nn.BCEWithLogitsLoss()
 
     def get_labels(self, size : int, real : bool):

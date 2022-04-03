@@ -4,6 +4,8 @@ def create_norm(norm : str):
         return nn.InstanceNorm2d
     elif norm == 'batch':
         return nn.BatchNorm2d
+    else:
+        raise NotImplementedError(f'{norm} normalization not supported')
 
 def create_padding(padding : str):
     if padding == 'reflect':
