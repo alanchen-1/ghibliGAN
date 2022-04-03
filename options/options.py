@@ -50,11 +50,11 @@ class Options():
         filename = os.path.join(export_dir, f'{opt.phase}_options.txt')
         with open(filename, 'wt') as open_file:
            open_file.write(string) 
-        
     
     def parse(self):
         opt = self.get_options()
         opt.to_train = self.to_train
         self.opt = opt
+        self.export_options(opt)
         return self.opt
 

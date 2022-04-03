@@ -1,15 +1,11 @@
 from scenedetect.video_manager import VideoManager
 from scenedetect.scene_manager import SceneManager, save_images
 from scenedetect.detectors.content_detector import ContentDetector
-import ntpath
 import os
 
-def get_video_alias(video_path : str) -> str:
-    return ntpath.basename(video_path).split('.')[0]
-
 class Scenes():
-    def __init__(self, video_path : str, threshold : float = 30.0):
-        self.filename = get_video_alias(video_path)
+    def __init__(self, video_path : str, video_name : str, threshold : float = 30.0):
+        self.filename = video_name
         self.video_manager = VideoManager([video_path])
         self.scene_manager = SceneManager()
         self.scene_manager.add_detector(ContentDetector(threshold=threshold))

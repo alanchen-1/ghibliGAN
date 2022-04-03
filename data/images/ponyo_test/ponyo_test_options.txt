@@ -1,0 +1,7 @@
+using options: 
+num_images : 1
+output_dir : ./images/
+threshold : 30.0
+video_name : ponyo_test
+video_path : ./videos/ponyo_test.mp4
+
