@@ -2,26 +2,38 @@ import argparse
 import os
 
 class SceneOptions():
+    """
+    Class for scene options.
+    Used for create_scene.py in the data package.
+    """
     def __init__(self):
-        self.initialized = False
+        """
+        Constructor for SceneOptions.
+        """
+        parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        self.parser = self.add_arguments(parser)
     
-    def initialize(self, parser : argparse.ArgumentParser):
+    def add_arguments(self, parser : argparse.ArgumentParser):
+        """
+        Adds arguments to the parser.
+            Parameters:
+                parser (argparse.ArgumentParser) : argument parser to initialize
+            Returns:
+                parser (argparse.ArgumentParser) : initialized argument parser
+        """
         parser.add_argument('--video_path', type=str, required=True, help='path to video file')
         parser.add_argument('--video_name', type=str, required=True, help='video name (name of subdirectory)')
         parser.add_argument('--output_dir', type=str, default='./images/', help='output directory. will create video_name subdirectory in here.')
         parser.add_argument('--threshold', type=float, default=30.0, help='video cutting threshold (read more in scenedetect docs)')
         parser.add_argument('--num_images', type=int, default=1, help='number of images per scene')
-        self.initialized = True
         return parser
 
-    def get_options(self):
-        if not self.initialized:
-            parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-            parser = self.initialize(parser)
-        self.parser = parser
-        return parser.parse_args()
-
     def export_options(self, opt):
+        """
+        Exports the options to a file in <output_dir>.
+            Parameters:
+                opt : parsed options
+        """
         string = 'using options: \n'
         for option, value in sorted(vars(opt).items()):
             string += f'{option} : {value}\n'
@@ -37,8 +49,13 @@ class SceneOptions():
            open_file.write(string) 
 
     def parse(self):
-        # get options, then export, then 
-        opt = self.get_options()
+        """
+        Parses, exports, and returns the options.
+        """
+        # get options
+        opt = self.parser.parse_args()
         self.opt = opt
+        # export
         self.export_options(opt)
+        # return parsed options
         return opt

@@ -1,5 +1,5 @@
 using options: 
-num_images : 1
+num_images : 2
 output_dir : ./images/
 threshold : 30.0
 video_name : ponyo_test

@@ -2,10 +2,23 @@ import argparse
 import os
 
 class Options():
+    """
+    Class defining Options for command line argument parsing.
+    """
     def __init__(self):
+        """
+        'Initialize the parser'.
+        """
         self.initialized = False
     
     def initialize(self, parser : argparse.ArgumentParser):
+        """
+        Initializes the parser with arguments.
+            Parameters:
+                parser (argparse.ArgumentParser) : uninitialized parser
+            Returns:
+                parser (argparse.ArgumentParser) : initialized parser
+        """
         # general params
         parser.add_argument('--dataroot', type=str, help='path to images w/ subfolders for respective domains')
         parser.add_argument('--model_name', type=str, default='model_results', help='name of model for directories')
@@ -32,6 +45,10 @@ class Options():
         return parser
     
     def get_options(self):
+        """
+        Initializes parser and gets the options by parsing.
+        Calls additional parser initialization if needed.
+        """
         if not self.initialized:
             parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
             parser = self.initialize(parser)
@@ -42,6 +59,11 @@ class Options():
         return parser.parse_args()
     
     def export_options(self, opt):
+        """
+        Exports parser options to a file in <checkpoints_dir>.
+            Parameters:
+                opt : options to export
+        """
         string = 'using options: \n'
         for option, value in sorted(vars(opt).items()):
             string += f'{option} : {value}\n'
@@ -55,6 +77,9 @@ class Options():
            open_file.write(string) 
     
     def parse(self):
+        """
+        Parse, update to_train, and export options.
+        """
         opt = self.get_options()
         opt.to_train = self.to_train
         self.opt = opt

@@ -7,7 +7,7 @@ def oned_tensor_equals(t1 : torch.Tensor, t2 : torch.Tensor) -> bool:
             t1 (Tensor) : first tensor
             t2 (Tensor) : second tensor
         Returns:
-            (boolean) : if they are elementwise equal
+            (bool) : if they are elementwise equal
     """
     if t1.size(dim=0) != t2.size(dim=0):
         return False
@@ -23,7 +23,7 @@ def twoD_tensor_equals(t1 : torch.Tensor, t2 : torch.Tensor) -> bool:
             t1 (Tensor) : first tensor
             t2 (Tensor) : second tensor
         Returns:
-            (boolean) : if they are elementwise equal
+            (bool) : if they are elementwise equal
     """
     if t1.size(dim=0) != t2.size(dim=0) or t1.size(dim=1) != t2.size(dim=1):
         return False
@@ -34,6 +34,14 @@ def twoD_tensor_equals(t1 : torch.Tensor, t2 : torch.Tensor) -> bool:
     return True
     
 def list_equals(l1 : list, l2 : list) -> bool:
+    """
+    Tests if two lists are equivalent elementwise.
+        Parameters:
+            l1 (list) : first list
+            l2 (list) : second list
+        Returns:
+            (bool) : if they are equal
+    """
     if len(l1) != len(l2):
         return False
     for i in range(0, len(l1)):

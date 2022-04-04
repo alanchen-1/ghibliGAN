@@ -1,8 +1,21 @@
 from .options import Options
+import argparse
 
-class TrainOptions(Options):
-
-    def initialize(self, parser):
+class CycleTrainOptions(Options):
+    """
+    Class defining extra options for training the CycleGAN model.
+    Inherits from Options defined in options.py.
+    """
+    def initialize(self, parser : argparse.ArgumentParser):
+        """
+        Initialize method with arguments.
+        Adds various arguments to the specified parser.
+        Also updates to_train to be True.
+            Parameters:
+                parser (argparse.ArgumentParser) : parser to update
+            Returns:
+                parser (argparse.ArgumentParser) : updated parser
+        """
         parser.add_argument('--save_freq', type=int, default=5000, help='frequency of saving the latest results')
         parser.add_argument('--save_epoch_freq', type=int, default=5, help='frequency of saving checkpoints at the end of epochs')
         parser.add_argument('--continue_train', action='store_true', help='continue training: load the latest model')
