@@ -19,6 +19,8 @@ class TestLoss(unittest.TestCase):
         test = Loss()
         self.assertTrue(oned_tensor_equals(torch.Tensor(np.ones(64)), test.get_labels(64, True)))
         self.assertTrue(oned_tensor_equals(torch.Tensor(np.zeros(64)), test.get_labels(64, False)))
+    
+    # test for computation
 
 if __name__ == '__main__':
     unittest.main()

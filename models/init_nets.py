@@ -54,7 +54,7 @@ def init_model(network : nn.Module, use_gpu : bool = True, init_type : str = 'no
     init_params(network, type=init_type, scale=init_scale)
     return network
 
-def init_resnet_generator(in_channels : int, out_channels : int, num_blocks : int, use_gpu : bool = True, init_type : str = 'normal', init_scale : float = 0.02):
+def init_resnet_generator(in_channels : int, out_channels : int, num_filters : int, num_blocks : int, norm : str = 'instance', use_gpu : bool = True, init_type : str = 'normal', init_scale : float = 0.02, use_dropout : bool = False):
     """
     Define and initialize a simple ResNetGenerator (uses a lot of default values).
     Provides a template to define custom initalize methods like this.
@@ -63,13 +63,15 @@ def init_resnet_generator(in_channels : int, out_channels : int, num_blocks : in
             in_channels (int) : channels in inputs
             out_channels (int) : channels in outputs
             num_blocks (int) : number of ResNetBlocks
+            norm (str) : normalization layers to use (after convs)
             use_gpu (bool) : whether to use GPU in training
             init_type (str) : initialization type
             init_scale (float) : initialization scale, only applicable for normal or xavier
+            use_dropout (bool) : whether to use dropout layers
         Returns:
             (nn.Module) : initialized network
     """
-    net = ResNetGenerator(in_channels=in_channels, out_channels=out_channels, num_blocks=num_blocks)
+    net = ResNetGenerator(in_channels=in_channels, out_channels=out_channels, num_filters=num_filters, num_blocks=num_blocks, norm=norm, use_dropout=use_dropout)
     return init_model(net, use_gpu=use_gpu, init_type=init_type, init_scale=init_scale)
 
 def init_patch_discriminator(in_channels : int, num_filters : int = 64, num_conv_layers : int = 3, norm : str = 'instance', init_type : str = 'normal', init_scale : float = 0.02, use_gpu : bool = True):

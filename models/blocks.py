@@ -149,26 +149,6 @@ class ResNetGenerator(nn.Module):
         output = self.model(x)
         return output
 
-# UNET Architecture
-"""
-class DownsampleBlock(nn.Module): 
-    def __init__(self, dim : int, use_bias : bool):
-        super(DownsampleBlock, self).__init__()
-
-        self.block = self.create_block(dim, use_bias)
-    def create_block(dim : int, use_bias : bool) :
-        block = []
-        block += [nn.Conv2d(dim, dim stride=2),
-        nn.InstanceNorm2d()]
-        # Conv2d layer, stride 2
-        # padding = 1
-        # norm = instancenorm
-        # leaky relu
-        return nn.Sequential(*block)
-    
-#    def forward(self, x):
-"""
-
 class PatchDiscriminator(nn.Module):
     """
     Class to define a PatchGAN discriminator.
@@ -239,3 +219,23 @@ print(testNet)
 
 #testG = ResNetGenerator(3, 3)
 #print(testG)
+
+# UNET Architecture
+"""
+class DownsampleBlock(nn.Module): 
+    def __init__(self, dim : int, use_bias : bool):
+        super(DownsampleBlock, self).__init__()
+
+        self.block = self.create_block(dim, use_bias)
+    def create_block(dim : int, use_bias : bool) :
+        block = []
+        block += [nn.Conv2d(dim, dim stride=2),
+        nn.InstanceNorm2d()]
+        # Conv2d layer, stride 2
+        # padding = 1
+        # norm = instancenorm
+        # leaky relu
+        return nn.Sequential(*block)
+    
+#    def forward(self, x):
+"""

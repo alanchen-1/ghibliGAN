@@ -14,9 +14,9 @@ class TrainOptions(Options):
         parser.add_argument('--beta1', type=float, default=0.5, help='beta1 parameter for adam')
         parser.add_argument('--lr', type=float, default=0.0002, help='initial learning rate')
         parser.add_argument('--loss_type', type=str, default='mse', help='loss criteria to use')
-        parser.add_argument('--pool_size', type=int, default=50, help='size of image buffer to use, original paper uses 50 (default)')
+        parser.add_argument('--buffer_size', type=int, default=50, help='size of image buffer to use, original paper uses 50 (default)')
 
-        parser.add_argument('--lambda_identity', type=float, default=0.5, help='lambda_identity to use in loss calculation')
+        parser.add_argument('--lambda_scaling', type=float, default=0.5, help='scaling multiplier to use in loss calculation')
         parser.add_argument('--lambda_X', type=float, default=10.0, help='multiplier on cycle loss in domain X (i.e. on the cycle XYX)')
         parser.add_argument('--lambda_Y', type=float, default=10.0, help='multiplier on cycle loss in domain Y (i.e. on the cycle YXY)')
 
