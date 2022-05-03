@@ -11,4 +11,3 @@ opt = parser.parse()
 
 scenes_manager = Scenes(opt.video_path, opt.video_name, opt.threshold)
 scenes_manager.save_scenes(opt.num_images, opt.output_dir)
-
