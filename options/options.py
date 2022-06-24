@@ -22,11 +22,8 @@ class Options():
         # general params
         parser.add_argument('--dataroot', type=str, help='path to images w/ subfolders for respective domains')
         parser.add_argument('--model_name', type=str, default='model_results', help='name of model for directories')
-        parser.add_arguemnt('--use_gpu', type=bool, default=True, help ='whether to use gpu or not (will use gpu index 0)')
+        parser.add_argument('--use_gpu', type=bool, default=True, help ='whether to use gpu or not (will use gpu index 0)')
         parser.add_argument('--checkpoints_dir', type=str, default='./checkpoints', help='directory to save model checkpoints in')
-        # default values here taken from original CycleGAN paper
-        parser.add_argument('--scale_size', type=int, defualt=286, help='scale images to this size')
-        parser.add_argument('--crop_size', type=int, default=256, help='crop scaled images to this size')
 
         # load params
         parser.add_argument('--load_epoch', type=str, default='latest', help='epoch to load')
@@ -45,6 +42,11 @@ class Options():
         parser.add_argument('--use_dropout', action='store_true', help='include if you want to use dropout layers')
     
         # data options
+        parser.add_argument('--batch_size', type=int, default=1, help='batch size when loading data')
+        parser.add_argument('--in_order', action='store_true', help="use if want to load the batches in order")
+        # default values here taken from original CycleGAN paper
+        parser.add_argument('--scale_size', type=int, defualt=286, help='scale images to this size')
+        parser.add_argument('--crop_size', type=int, default=256, help='crop scaled images to this size')
 
         self.initialized = True
         return parser
@@ -58,8 +60,6 @@ class Options():
             parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
             parser = self.initialize(parser)
         
-        opt, _ = parser.parse_known_args()
-
         self.parser = parser
         return parser.parse_args()
     

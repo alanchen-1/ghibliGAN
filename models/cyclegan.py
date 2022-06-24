@@ -9,6 +9,7 @@ from loss import Loss
 from buffer import Buffer
 from models.init_nets import init_linear_lr, init_resnet_generator, init_patch_discriminator
 from utils.model_utils import print_network
+from collections import OrderedDict
 
 # average workflow:
 # init network using options
@@ -25,15 +26,19 @@ class CycleGAN(nn.Module):
         self.opt = opt
         self.to_train = opt.to_train
         self.save_dir = os.path.join(opt.checkpoints_dir, opt.model_name)
-        self.device = torch.device(('cuda:0') if opt.use_gpu else "cpu")
-
+        os.makedirs(self.save_dir, exist_ok=True)
+        if opt.use_gpu:
+            self.device = torch.device(('cuda:0'))
+            torch.cuda.set_device(0)
+        else:
+            self.device = torch.device('cpu')
         # define nets
         self.genG = init_resnet_generator(opt.in_channels, opt.out_channels,
         opt.num_g_f, opt.num_g_blocks, opt.norm, opt.use_gpu,
         opt.init_type, opt.init_scale, opt.use_dropout)  # runs from domain X to Y
         self.genF = init_resnet_generator(opt.out_channels, opt.in_channels,
-        opt.num_g_f, opt.num_g_blocks, opt.norm, opt.use_gpu, opt.init_type,
-        opt.init_scale, opt.use_dropout)  # runs from domain Y to Y
+        opt.num_g_f, opt.num_g_blocks, opt.norm, opt.use_gpu, 
+        opt.init_type, opt.init_scale, opt.use_dropout)  # runs from domain Y to X
         self.model_names = ['genG', 'genF']
         if opt.to_train:
             # only define this other stuff if we are planning on training the model
@@ -100,7 +105,7 @@ class CycleGAN(nn.Module):
         self.loss_D_X = self.backward_D(self.netD_X, self.real_X, fake_X)
 
     def backward_D_Y(self):
-        """ Calculate gradients for discriminator on domain Y"""
+        """ Calculate gradients for discriminator on domain Y """
         fake_Y = self.fake_Y_buffer.query(self.fake_Y) 
         self.loss_D_Y = self.backward_D(self.netD_Y, self.real_Y, fake_Y)
     
@@ -158,7 +163,7 @@ class CycleGAN(nn.Module):
         if not self.isTrain or opt.continue_train:
             self.load_networks(opt.load_epoch)
         
-        print_network(opt.verbose)
+        print_network(self, opt.verbose)
 
 
     def setup_schedulers(self, opt):
@@ -168,14 +173,14 @@ class CycleGAN(nn.Module):
         for scheduler in self.schedulers:
             scheduler.step()
 
-    def save_networks(self, epoch : str):
+    def save_networks(self, epoch : str = 'latest'):
         for model_name in self.model_names:
             filename = f'{epoch}_{model_name}.pth'
             save_path = os.path.join(self.save_dir, filename)
             net = getattr(self, model_name)
             torch.save(net.state_dict(), save_path)
 
-    def load_networks(self, epoch : str):
+    def load_networks(self, epoch : str = 'latest'):
         for model_name in self.model_names:
             load_path = os.path.join(self.save_dir, f'{epoch}_{model_name}.pth')
             net = getattr(self, model_name)
@@ -184,5 +189,24 @@ class CycleGAN(nn.Module):
                 del state_dict._metadata
             net.load_state_dict(state_dict)
         
-
+    def eval(self):
+        for model_name in self.model_names:
+            net = getattr(self, model_name)
+            net.eval()
+    
+    def get_losses(self):
+        """
+        Must be called after all the values in the dict have been created.
+            In 99% of cases, this is satisfied after one call of optimize()
+        """
+        return OrderedDict(
+           D_X=self.loss_D_X,
+           D_Y=self.loss_D_Y,
+           G=self.loss_domain_Y,
+           F=self.loss_domain_X,
+           cycle_X=self.cycle_loss_X,
+           cycle_Y=self.cycle_loss_Y, 
+           identity_X=self.identity_loss_X,
+           identity_Y=self.identity_loss_Y,
+        )
 

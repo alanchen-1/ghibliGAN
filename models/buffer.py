@@ -17,7 +17,7 @@ class Buffer():
         self.buffer = []
         self.num_tensors = 0
     
-    def query(self, fake_tensors : list[torch.Tensor]):
+    def query(self, fake_tensors : "list[torch.Tensor]"):
         """
         Queries the buffer.
             Parameters:

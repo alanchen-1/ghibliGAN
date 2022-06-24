@@ -16,6 +16,7 @@ class CycleTrainOptions(Options):
             Returns:
                 parser (argparse.ArgumentParser) : updated parser
         """
+        parser = Options.initialize(self, parser)
         parser.add_argument('--save_freq', type=int, default=5000, help='frequency of saving the latest results')
         parser.add_argument('--save_epoch_freq', type=int, default=5, help='frequency of saving checkpoints at the end of epochs')
         parser.add_argument('--continue_train', action='store_true', help='continue training: load the latest model')
