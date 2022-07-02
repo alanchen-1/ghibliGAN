@@ -5,8 +5,8 @@ import itertools
 import os
 import torch
 import torch.nn as nn
-from loss import Loss
-from buffer import Buffer
+from models.loss import Loss
+from models.buffer import Buffer
 from models.init_nets import init_linear_lr, init_resnet_generator, init_patch_discriminator
 from utils.model_utils import print_network
 from collections import OrderedDict
@@ -23,9 +23,12 @@ class CycleGAN(nn.Module):
             Parameters:
                 opt (Options) - options for instantiation
         """
+        super(CycleGAN, self).__init__()
         self.opt = opt
         self.to_train = opt.to_train
+
         self.save_dir = os.path.join(opt.checkpoints_dir, opt.model_name)
+        print(f"Saving logs in {self.save_dir}")
         os.makedirs(self.save_dir, exist_ok=True)
         if opt.use_gpu:
             self.device = torch.device(('cuda:0'))
@@ -74,8 +77,8 @@ class CycleGAN(nn.Module):
         self.fake_Y = self.genG(self.real_X)
         self.fake_X = self.genF(self.real_Y)
         # run generator on both fake generated sets
-        self.fake_fake_X = self.genF(self.fake_Y)
-        self.fake_fake_Y = self.genG(self.fake_X)
+        self.fake_fake_X = self.genF(self.fake_Y) # F(G(X)), in domain X
+        self.fake_fake_Y = self.genG(self.fake_X) # G(F(Y)), in domain Y
     
     def backward_D(self, discriminator : nn.Module, real : torch.Tensor, fake : torch.Tensor, factor : float = 0.5):
         """
@@ -89,7 +92,7 @@ class CycleGAN(nn.Module):
                 loss : calculated loss gradients
         """
         # run on real dataset
-        predict_real = discriminator(real)
+        predict_real = discriminator(real.detach())
         loss_real = self.loss_func(predict_real, True)
         # run on fake generated (detach from device)
         predict_fake = discriminator(fake.detach())
@@ -132,10 +135,10 @@ class CycleGAN(nn.Module):
         self.loss_domain_X = self.loss_func(self.netD_X(self.fake_X), True)
         # loss of D_Y(G(x)) [Y domain fakes]
         self.loss_domain_Y = self.loss_func(self.netD_Y(self.fake_Y), True)
-        # cycle loss of D_Y(G(F(y)))
-        self.cycle_loss_Y = self.loss_cycle(self.netD_Y(self.fake_fake_Y, self.real_Y)) * lambda_Y # G(F) lives in Y
-        # cycle loss of D_X(F(G(x)))
-        self.cycle_loss_X = self.loss_cycle(self.netD_X(self.fake_fake_X, self.real_X)) * lambda_X # F(G) lives in X
+        # cycle loss of ||G(F(Y)) - Y||
+        self.cycle_loss_Y = self.loss_cycle(self.fake_fake_Y, self.real_Y) * lambda_Y # G(F) lives in Y
+        # cycle loss of ||F(G(X)) - X||
+        self.cycle_loss_X = self.loss_cycle(self.fake_fake_X, self.real_X) * lambda_X # F(G) lives in X
 
         self.loss_G = self.loss_domain_X + self.loss_domain_Y + self.cycle_loss_X + self.cycle_loss_Y + self.identity_loss_X + self.identity_loss_Y
         self.loss_G.backward()
@@ -160,7 +163,7 @@ class CycleGAN(nn.Module):
     def general_setup(self, opt):
         if self.to_train:
             self.setup_schedulers(opt)
-        if not self.isTrain or opt.continue_train:
+        if not self.to_train or opt.continue_train:
             self.load_networks(opt.load_epoch)
         
         print_network(self, opt.verbose)

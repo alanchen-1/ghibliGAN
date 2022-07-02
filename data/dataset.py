@@ -1,4 +1,3 @@
-
 from torch.utils.data import Dataset
 from torchvision import transforms
 from PIL import Image
@@ -38,7 +37,7 @@ class CycleDataset(Dataset):
     
     def get_transforms(self, grayscale=False):
         core_transforms = [
-            transforms.Resize(self.out_size, Image.BICUBIC),
+            transforms.Resize(self.out_size, transforms.InterpolationMode.BICUBIC),
             transforms.RandomCrop(self.opt.crop_size),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
@@ -47,7 +46,7 @@ class CycleDataset(Dataset):
             transform = [transforms.Grayscale(1)] + core_transforms +  [transforms.Normalize((0.5,), (0.5,))]
         else:
             transform = core_transforms + [transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
-        return transform
+        return transforms.Compose(transform)
     
     def __getitem__(self, index : int):
         X_img_path = self.X_images[index % self.Xsize]

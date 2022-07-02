@@ -23,14 +23,13 @@ if __name__ == '__main__':
     print ("Starting training loop...")
     # main loop
     total_epochs = opt.warmup_epochs + opt.decay_epochs
+    print("total epochs: ", total_epochs)
     for epoch in range(opt.start_epoch, total_epochs + 1):
         for i, data in enumerate(dataset):
-            # first update lr
-            model.update_schedulers()
-            # data loop
             model.setup_input(data)
             model.optimize()
-        if (epoch % opt.save_epoch_freq == 0) or ((i == max_size - 1) and (epoch == total_epochs)):
+            model.update_schedulers()
+        if (epoch % opt.save_epoch_freq == 0) or (epoch == total_epochs):
             # save version with latest and also with epoch num
             model.save_networks()
             model.save_networks(str(epoch))

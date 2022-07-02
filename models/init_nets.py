@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from torch.nn import init
 from torch.optim import lr_scheduler
-from blocks import ResNetGenerator, PatchDiscriminator
+from models.blocks import ResNetGenerator, PatchDiscriminator
 from utils.str_to_layer import create_norm
 
 def init_params(network : nn.Module, init_type : str, init_scale : float) -> None:
@@ -21,18 +21,22 @@ def init_params(network : nn.Module, init_type : str, init_scale : float) -> Non
             Parameters:
                 model (nn.Module) : network/layer to apply to
         """
-        if init_type == 'normal':
-            init.normal_(network.weight.data, 0, init_scale)
-        elif init_type == 'xavier':
-            init.xavier_normal_(network.weight.data, gain=init_scale)
-        elif init_type == 'kaiming':
-            init.kaiming_normal_(model.weight.data)
-        else:
-            raise NotImplementedError(f'{type} initialization not implemented')
-        # init bias to 0 if has bias
-        if hasattr(model, 'bias'):
+        classname = model.__class__.__name__
+        if hasattr(model, 'weight') and (classname.find('Conv') != -1 or classname.find('Linear') != -1):
+            if init_type == 'normal':
+                init.normal_(model.weight.data, 0.0, init_scale)
+            elif init_type == 'xavier':
+                init.xavier_normal_(model.weight.data, gain=init_scale)
+            elif init_type == 'kaiming':
+                init.kaiming_normal_(model.weight.data, a=0, mode='fan_in')
+            else:
+                raise NotImplementedError(f'{type} initialization not implemented')
+            # init bias to 0 if has bias
+            if hasattr(model, 'bias') and model.bias is not None:
+                init.constant_(model.bias.data, 0.0)
+        elif classname.find('BatchNorm2d') != -1:
+            init.normal_(model.weight.data, 1.0, init_scale)
             init.constant_(model.bias.data, 0.0)
-
     # apply to each layer in the network
     network.apply(init_params_helper)
 
@@ -63,7 +67,7 @@ def init_model(network : nn.Module, use_gpu : bool = True, init_type : str = 'no
             (nn.Module) : initialized network
     """
     network = add_device(network, use_gpu)
-    init_params(network, type=init_type, scale=init_scale)
+    init_params(network, init_type=init_type, init_scale=init_scale)
     return network
 
 def init_resnet_generator(in_channels : int, out_channels : int, num_filters : int, num_blocks : int, norm : str = 'instance',

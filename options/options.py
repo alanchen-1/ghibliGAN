@@ -20,14 +20,14 @@ class Options():
                 parser (argparse.ArgumentParser) : initialized parser
         """
         # general params
-        parser.add_argument('--dataroot', type=str, help='path to images w/ subfolders for respective domains')
+        parser.add_argument('--dataroot', type=str, required=True, help='[R] path to images w/ subfolders for respective domains')
         parser.add_argument('--model_name', type=str, default='model_results', help='name of model for directories')
-        parser.add_argument('--use_gpu', type=bool, default=True, help ='whether to use gpu or not (will use gpu index 0)')
+        parser.add_argument('--use_gpu', action="store_true", help ='whether to use gpu or not (will use gpu index 0)')
         parser.add_argument('--checkpoints_dir', type=str, default='./checkpoints', help='directory to save model checkpoints in')
 
         # load params
         parser.add_argument('--load_epoch', type=str, default='latest', help='epoch to load')
-        parser.add_argument('--verbose',  type=bool, default=True, help="use verbose or not")
+        parser.add_argument('--verbose', action="store_true", help="use verbose or not")
 
         # model params
         parser.add_argument('--in_channels', type=int, default=3, help='number of input channels, default is 3 (rgb), 1 is grayscale')
@@ -45,7 +45,7 @@ class Options():
         parser.add_argument('--batch_size', type=int, default=1, help='batch size when loading data')
         parser.add_argument('--in_order', action='store_true', help="use if want to load the batches in order")
         # default values here taken from original CycleGAN paper
-        parser.add_argument('--scale_size', type=int, defualt=286, help='scale images to this size')
+        parser.add_argument('--scale_size', type=int, default=286, help='scale images to this size')
         parser.add_argument('--crop_size', type=int, default=256, help='crop scaled images to this size')
 
         self.initialized = True
@@ -57,7 +57,7 @@ class Options():
         Calls additional parser initialization if needed.
         """
         if not self.initialized:
-            parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+            parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter, description="Options for ghibliGAN, [R] marks required")
             parser = self.initialize(parser)
         
         self.parser = parser

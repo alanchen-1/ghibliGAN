@@ -152,6 +152,8 @@ class ResNetGenerator(nn.Module):
 class PatchDiscriminator(nn.Module):
     """
     Class to define a PatchGAN discriminator.
+    PatchGAN is a discriminator architecture that outputs a value for each "patch" on the image
+    convolutionally rather than one value for the entire image.
     """
     def __init__(self,
     num_channels : int,
@@ -211,8 +213,8 @@ class PatchDiscriminator(nn.Module):
         return output
 
 # test stuff
-testNet = ResNetBlock(64, dropout=False, bias=True, norm='instance')
-print(testNet)
+#testNet = ResNetBlock(64, dropout=False, bias=True, norm='instance')
+#print(testNet)
 
 #testD = PatchDiscriminator(3)
 #print(testD)

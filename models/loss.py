@@ -27,7 +27,7 @@ class Loss(nn.Module):
         elif loss_type == 'bce':
             self.loss = nn.BCEWithLogitsLoss()
 
-    def get_labels(self, size : int, real : bool):
+    def get_labels(self, predicted : torch.Tensor, real : bool):
         """
         Sets up the labels. This is the key method, as it makes training simpler because we don't
         have to worry about setting up labels of the right size every time we call Loss.
@@ -40,8 +40,8 @@ class Loss(nn.Module):
                 (Tensor) : created tensor of labels
         """
         if real:
-            return self.real_label.expand(size)
-        return self.fake_label.expand(size)
+            return self.real_label.expand_as(predicted)
+        return self.fake_label.expand_as(predicted)
 
     def __call__(self, predicted : torch.Tensor, real : bool):
         """
@@ -53,6 +53,6 @@ class Loss(nn.Module):
             Returns:
                 loss (float) : float value of loss to use in backpropagation
         """
-        labels = self.get_labels(predicted.size(dim=0), real)
+        labels = self.get_labels(predicted, real)
         loss = self.loss(predicted, labels)
         return loss
