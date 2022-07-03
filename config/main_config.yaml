@@ -1,0 +1,37 @@
+dataset:
+    batch_size: 1
+    in_order: True
+    scale_size: 286
+    crop_size: 256
+    in_channels: 3
+    out_channels: 3
+    num_workers: 4
+ 
+model:
+    verbose: True
+    generator:
+        num_filters: 64
+        num_blocks: 9
+        padding: 'reflect'
+        norm: 'instance'
+        use_dropout: True
+        num_sampling: 2
+        init_type: 'normal'
+        init_scale: 0.02
+    discriminator:
+        num_filters: 64
+        num_conv_layers: 3
+        ker_size: 4
+        padding: 1
+
+train:
+    save_epoch_freq: 10
+    warmup_epochs: 100
+    decay_epochs: 100
+    beta1: 0.5
+    lr: 0.0002
+    loss_type: 'mse'
+    buffer_size: 50
+    lambda_scaling: 0.5
+    lambda_X: 10.0
+    lambda_Y: 10.0

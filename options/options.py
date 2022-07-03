@@ -24,6 +24,7 @@ class Options():
         parser.add_argument('--model_name', type=str, default='model_results', help='name of model for directories')
         parser.add_argument('--use_gpu', action="store_true", help ='whether to use gpu or not (will use gpu index 0)')
         parser.add_argument('--checkpoints_dir', type=str, default='./checkpoints', help='directory to save model checkpoints in')
+        parser.add_argument('--config', type=str, required=True, help="path to config file")
 
         # load params
         parser.add_argument('--load_epoch', type=str, default='latest', help='epoch to load')
@@ -42,12 +43,6 @@ class Options():
         parser.add_argument('--use_dropout', action='store_true', help='include if you want to use dropout layers')
     
         # data options
-        parser.add_argument('--batch_size', type=int, default=1, help='batch size when loading data')
-        parser.add_argument('--in_order', action='store_true', help="use if want to load the batches in order")
-        # default values here taken from original CycleGAN paper
-        parser.add_argument('--scale_size', type=int, default=286, help='scale images to this size')
-        parser.add_argument('--crop_size', type=int, default=256, help='crop scaled images to this size')
-
         self.initialized = True
         return parser
     

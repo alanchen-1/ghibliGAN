@@ -17,8 +17,8 @@ class TestLoss(unittest.TestCase):
         Tests the get_labels method.
         """
         test = Loss()
-        self.assertTrue(oned_tensor_equals(torch.Tensor(np.ones(64)), test.get_labels(64, True)))
-        self.assertTrue(oned_tensor_equals(torch.Tensor(np.zeros(64)), test.get_labels(64, False)))
+        self.assertTrue(oned_tensor_equals(torch.Tensor(np.ones(64)), test.get_labels(torch.Tensor(np.empty(64)), True)))
+        self.assertTrue(oned_tensor_equals(torch.Tensor(np.zeros(64)), test.get_labels(torch.Tensor(np.empty(64)), False)))
     
     # test for computation
 

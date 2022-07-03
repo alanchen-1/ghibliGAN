@@ -13,14 +13,12 @@ def image_walk(root_dir):
                 images.append(os.path.join(root, filename))
     return images
 
-
 class CycleDataset(Dataset):
-    def __init__(self, opt):
-        self.opt = opt
-        self.dataroot = opt.dataroot
+    def __init__(self, to_train, dataroot, scale_size, in_channels, out_channels, crop_size, in_order, **kwargs):
+        self.dataroot = dataroot
         assert os.path.isdir(self.dataroot), f"{self.dataroot} is not a recognized directory"
 
-        mode = 'train' if opt.to_train else 'test'
+        mode = 'train' if to_train else 'test'
         self.Xdir = os.path.join(self.dataroot, f"{mode}X")
         self.Ydir = os.path.join(self.dataroot, f"{mode}Y")
 
@@ -30,15 +28,16 @@ class CycleDataset(Dataset):
         self.create_dataset()
         self.Xsize = len(self.X_images)
         self.Ysize = len(self.Y_images)
+        self.in_order = in_order
 
-        self.out_size = [opt.scale_size, opt.scale_size]
-        self.transform_X = self.get_transforms(opt.in_channels == 1)
-        self.transform_Y = self.get_transforms(opt.out_channels == 1)
+        self.out_size = [scale_size, scale_size]
+        self.transform_X = self.get_transforms(crop_size, in_channels == 1)
+        self.transform_Y = self.get_transforms(crop_size, out_channels == 1)
     
-    def get_transforms(self, grayscale=False):
+    def get_transforms(self, crop_size, grayscale=False):
         core_transforms = [
             transforms.Resize(self.out_size, transforms.InterpolationMode.BICUBIC),
-            transforms.RandomCrop(self.opt.crop_size),
+            transforms.RandomCrop(crop_size),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
         ]
@@ -50,7 +49,7 @@ class CycleDataset(Dataset):
     
     def __getitem__(self, index : int):
         X_img_path = self.X_images[index % self.Xsize]
-        if self.opt.in_order:
+        if self.in_order:
             Y_img_path = self.Y_images[index % self.Ysize]
         else:
             Y_img_path = self.Y_images[random.randint(0, self.Ysize)]
@@ -74,4 +73,6 @@ class CycleDataset(Dataset):
     def create_dataset(self):
         self.X_images = sorted(image_walk(self.Xdir))
         self.Y_images = sorted(image_walk(self.Ydir))
+
+
 

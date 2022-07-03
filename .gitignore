@@ -1,5 +1,12 @@
+# my notes file
 notes.txt
 
+# ignore checkpoints
+*.pth
+
+# cache files
 __pycache__/
+
+# ignore big data
 data/videos/
 data/images/
