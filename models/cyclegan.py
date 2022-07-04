@@ -22,13 +22,15 @@ class CycleGAN(nn.Module):
     def __init__(self, opt : Namespace, config : dict):
         """
             Parameters:
-                opt (Options) - options for instantiation
+                opt (Namespace) - options for instantiation
+                config (dict) - config dictionary specifying the network architectures, probably parsed from a yaml
         """
         super(CycleGAN, self).__init__()
         self.opt = opt
         self.config = config
         self.to_train = opt.to_train
 
+        # create log dir
         self.save_dir = os.path.join(opt.checkpoints_dir, opt.model_name)
         print(f"Saving logs in {self.save_dir}")
         os.makedirs(self.save_dir, exist_ok=True)
@@ -37,6 +39,7 @@ class CycleGAN(nn.Module):
             torch.cuda.set_device(0)
         else:
             self.device = torch.device('cpu')
+
         # define nets
         self.in_channels = config['dataset']['in_channels']
         self.out_channels = config['dataset']['out_channels']
@@ -71,11 +74,19 @@ class CycleGAN(nn.Module):
             self.optimizers = [self.optim_G, self.optim_D]
 
     def setup_input(self, input : dict):
+        """
+        Sets the input in preparation for forwarding through the networks.
+            Parameters:
+                input (dict) : input dictionary
+        """
         self.real_X = input['X'].to(self.device)
         self.real_Y = input['Y'].to(self.device)
         self.image_paths = input['X_paths']
     
     def forward(self):
+        """
+        Runs generator on real datasets and on the newly generated fake datasets.
+        """
         # run generators on both real datasets
         self.fake_Y = self.genG(self.real_X)
         self.fake_X = self.genF(self.real_Y)
@@ -116,6 +127,10 @@ class CycleGAN(nn.Module):
         self.loss_D_Y = self.backward_D(self.netD_Y, self.real_Y, fake_Y)
     
     def backward_G(self):
+        """
+        Calculates the total loss for the generators and calls .backward().
+        Currently uses discriminator loss, cycle loss, and identity loss if lambda_scaling is present.
+        """
         # use options
         lambda_scaling = self.config['train']['loss']['lambda_scaling']
         lambda_X = self.config['train']['loss']['lambda_X']
@@ -147,7 +162,9 @@ class CycleGAN(nn.Module):
         self.loss_G.backward()
     
     def optimize(self):
-        # do everything above!    
+        """
+        Main method called every training loop. Forwards inputs and backpropagates losses.
+        """
         # forward thru network
         self.forward()
 
@@ -164,6 +181,10 @@ class CycleGAN(nn.Module):
 
     # utils
     def general_setup(self):
+        """
+        Sets up model's networks and optimizers according to whether it is being run for training or not.
+        Prints networks with verbose option at end.
+        """
         if self.to_train:
             self.setup_schedulers()
         if not self.to_train or self.opt.continue_train:
@@ -172,13 +193,25 @@ class CycleGAN(nn.Module):
         print_network(self, self.opt.verbose)
 
     def setup_schedulers(self):
+        """
+        Sets up the list of learning rate schedulers for all optimizers.
+        """
         self.schedulers = [init_linear_lr(optimizer, **self.config['train']) for optimizer in self.optimizers]
         
     def update_schedulers(self):
+        """
+        Updates all schedulers.
+        """
         for scheduler in self.schedulers:
             scheduler.step()
 
     def save_networks(self, epoch : str = 'latest'):
+        """
+        Saves network state dictionaries in a .pth file.
+            Parameters:
+                epoch (str) : which epoch these models are from. 
+                    used later on when loading the models
+        """
         for model_name in self.model_names:
             filename = f'{epoch}_{model_name}.pth'
             save_path = os.path.join(self.save_dir, filename)
@@ -186,6 +219,11 @@ class CycleGAN(nn.Module):
             torch.save(net.state_dict(), save_path)
 
     def load_networks(self, epoch : str = 'latest'):
+        """
+        Loads the network specified by epoch.
+            Parameters:
+                epoch (str) : which epoch to load, default is 'latest'
+        """
         for model_name in self.model_names:
             load_path = os.path.join(self.save_dir, f'{epoch}_{model_name}.pth')
             net = getattr(self, model_name)
@@ -195,6 +233,9 @@ class CycleGAN(nn.Module):
             net.load_state_dict(state_dict)
         
     def eval(self):
+        """
+        Sets models in evaluation mode (turns off gradients, etc.) to avoid unnecessary computations.
+        """
         for model_name in self.model_names:
             net = getattr(self, model_name)
             net.eval()
@@ -202,7 +243,7 @@ class CycleGAN(nn.Module):
     def get_losses(self):
         """
         Must be called after all the values in the dict have been created.
-            In 99% of cases, this is satisfied after one call of optimize()
+            (This is satisfied after one call of optimize())
         """
         return OrderedDict(
            D_X=self.loss_D_X,

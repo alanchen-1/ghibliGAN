@@ -89,7 +89,8 @@ def init_resnet_generator(in_channels : int, out_channels : int, use_gpu : bool,
         Returns:
             (nn.Module) : initialized Generator 
     """
-    net = ResNetGenerator(in_channels=in_channels, out_channels=out_channels, num_filters=num_filters, num_blocks=num_blocks, norm=norm, use_dropout=use_dropout, num_sampling=num_sampling)
+    net = ResNetGenerator(in_channels=in_channels, out_channels=out_channels, num_filters=num_filters,
+    num_blocks=num_blocks, norm=norm, use_dropout=use_dropout, num_sampling=num_sampling)
     return init_model(net, use_gpu=use_gpu, init_type=init_type, init_scale=init_scale)
 
 def init_patch_discriminator(in_channels : int, num_filters : int = 64, num_conv_layers : int = 3, norm : str = 'instance', ker_size : int = 4, padding : int = 1,
