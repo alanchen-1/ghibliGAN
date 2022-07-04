@@ -70,8 +70,8 @@ def init_model(network : nn.Module, use_gpu : bool = True, init_type : str = 'no
     init_params(network, init_type=init_type, init_scale=init_scale)
     return network
 
-def init_resnet_generator(in_channels : int, out_channels : int, num_filters : int, num_blocks : int, norm : str = 'instance',
-    use_gpu : bool = True, init_type : str = 'normal', init_scale : float = 0.02, use_dropout : bool = False):
+def init_resnet_generator(in_channels : int, out_channels : int, use_gpu : bool, num_filters : int, num_blocks : int, norm : str = 'instance', num_sampling : int = 2,
+    init_type : str = 'normal', init_scale : float = 0.02, use_dropout : bool = False, **kwargs):
     """
     Define and initialize a simple ResNetGenerator (uses a lot of default values).
     Provides a template to define custom initalize methods like this.
@@ -89,10 +89,10 @@ def init_resnet_generator(in_channels : int, out_channels : int, num_filters : i
         Returns:
             (nn.Module) : initialized Generator 
     """
-    net = ResNetGenerator(in_channels=in_channels, out_channels=out_channels, num_filters=num_filters, num_blocks=num_blocks, norm=norm, use_dropout=use_dropout)
+    net = ResNetGenerator(in_channels=in_channels, out_channels=out_channels, num_filters=num_filters, num_blocks=num_blocks, norm=norm, use_dropout=use_dropout, num_sampling=num_sampling)
     return init_model(net, use_gpu=use_gpu, init_type=init_type, init_scale=init_scale)
 
-def init_patch_discriminator(in_channels : int, num_filters : int = 64, num_conv_layers : int = 3, norm : str = 'instance',
+def init_patch_discriminator(in_channels : int, num_filters : int = 64, num_conv_layers : int = 3, norm : str = 'instance', ker_size : int = 4, padding : int = 1,
     init_type : str = 'normal', init_scale : float = 0.02, use_gpu : bool = True):
     """
     Define and initialize a Patch Discriminator.
@@ -108,10 +108,10 @@ def init_patch_discriminator(in_channels : int, num_filters : int = 64, num_conv
             (nn.Module) : initialized Discriminator
     """
     norm_layer = create_norm(norm)
-    net = PatchDiscriminator(in_channels, num_filters, num_conv_layers, norm_layer)
+    net = PatchDiscriminator(in_channels, num_filters, num_conv_layers, norm_layer, ker_size, padding)
     return init_model(net, use_gpu=use_gpu, init_type=init_type, init_scale=init_scale)
 
-def init_linear_lr(optimizer : torch.optim, start_epoch : int, warmup_epochs : int, decay_epochs : int):
+def init_linear_lr(optimizer : torch.optim, start_epoch : int, warmup_epochs : int, decay_epochs : int, **kwargs):
     """
     Simple linear learning rate scheduler.
         Parameters:

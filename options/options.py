@@ -27,21 +27,9 @@ class Options():
         parser.add_argument('--config', type=str, required=True, help="path to config file")
 
         # load params
-        parser.add_argument('--load_epoch', type=str, default='latest', help='epoch to load')
+        parser.add_argument('--load_epoch', type=str, default='latest', help='Epoch to load. Only used if --continue_train is included or you are running test.py.')
         parser.add_argument('--verbose', action="store_true", help="use verbose or not")
 
-        # model params
-        parser.add_argument('--in_channels', type=int, default=3, help='number of input channels, default is 3 (rgb), 1 is grayscale')
-        parser.add_argument('--out_channels', type=int, default=3, help='number of output channels, default is 3 (rgb), 1 is grayscale')
-        parser.add_argument('--num_g_f', type=int, default=64, help='number of generator filters in the last convolutional layer')
-        parser.add_argument('--num_d_f', type=int, default=64, help='number of discriminator filters in the first convolutional layer')
-        parser.add_argument('--num_g_blocks', type=int, default=9, help='number of residual generator blocks')
-        parser.add_argument('--num_d_layers', type=int, default=3, help='number of convolutional blocks in discriminator')
-        parser.add_argument('--norm', type=str, default='instance', help='type of normalization to use')
-        parser.add_argument('--init_type', type=str, default='normal', help='type of initialization to use')
-        parser.add_argument('--init_scale', type=float, default=0.02, help='initialization scale to use')
-        parser.add_argument('--use_dropout', action='store_true', help='include if you want to use dropout layers')
-    
         # data options
         self.initialized = True
         return parser
@@ -83,6 +71,5 @@ class Options():
         opt = self.get_options()
         opt.to_train = self.to_train
         self.opt = opt
-        self.export_options(opt)
         return self.opt
 

@@ -1,5 +1,5 @@
 import unittest
-from test_utils import list_equals, twoD_tensor_equals
+from comparisons import list_equals, twoD_tensor_equals
 import sys
 sys.path.append('..')
 from models.buffer import Buffer

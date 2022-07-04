@@ -1,3 +1,4 @@
+from argparse import Namespace
 import sys
 sys.path.append('..')
 
@@ -18,13 +19,14 @@ from collections import OrderedDict
 # forward thru network
 # save networks whenever necessary
 class CycleGAN(nn.Module):
-    def __init__(self, opt):
+    def __init__(self, opt : Namespace, config : dict):
         """
             Parameters:
                 opt (Options) - options for instantiation
         """
         super(CycleGAN, self).__init__()
         self.opt = opt
+        self.config = config
         self.to_train = opt.to_train
 
         self.save_dir = os.path.join(opt.checkpoints_dir, opt.model_name)
@@ -36,35 +38,36 @@ class CycleGAN(nn.Module):
         else:
             self.device = torch.device('cpu')
         # define nets
-        self.genG = init_resnet_generator(opt.in_channels, opt.out_channels,
-        opt.num_g_f, opt.num_g_blocks, opt.norm, opt.use_gpu,
-        opt.init_type, opt.init_scale, opt.use_dropout)  # runs from domain X to Y
-        self.genF = init_resnet_generator(opt.out_channels, opt.in_channels,
-        opt.num_g_f, opt.num_g_blocks, opt.norm, opt.use_gpu, 
-        opt.init_type, opt.init_scale, opt.use_dropout)  # runs from domain Y to X
+        self.in_channels = config['dataset']['in_channels']
+        self.out_channels = config['dataset']['out_channels']
+        self.genG = init_resnet_generator(self.in_channels, self.out_channels, use_gpu=opt.use_gpu, **config['model']['generator'])
+        self.genF = init_resnet_generator(self.out_channels, self.in_channels, use_gpu=opt.use_gpu, **config['model']['generator'])
         self.model_names = ['genG', 'genF']
-        if opt.to_train:
+        if self.to_train:
             # only define this other stuff if we are planning on training the model
             # discriminator for X (D_X)
-            self.netD_X = init_patch_discriminator(opt.in_channels, opt.num_d_f, opt.num_d_layers, opt.norm, opt.init_type, opt.init_scale, opt.use_gpu)
+            self.netD_X = init_patch_discriminator(self.in_channels, **config['model']['discriminator'], use_gpu=opt.use_gpu)
             # discriminator for Y (D_Y)
-            self.netD_Y = init_patch_discriminator(opt.out_channels, opt.num_d_f, opt.num_d_layers, opt.norm, opt.init_type, opt.init_scale, opt.use_gpu) 
+            self.netD_Y = init_patch_discriminator(self.out_channels, **config['model']['discriminator'], use_gpu=opt.use_gpu) 
             self.model_names.append('netD_X')
             self.model_names.append('netD_Y')
         
             # define loss functions/objective functions
-            self.loss_func = Loss(loss_type=opt.loss_type).to(self.device)
+            self.loss_func = Loss(config['train']['loss']['loss_type']).to(self.device)
             self.loss_cycle = torch.nn.L1Loss()
             # loss for use with lambdas
             self.loss_identity = torch.nn.L1Loss()
 
             # define image pools
-            self.fake_X_buffer = Buffer(opt.buffer_size)
-            self.fake_Y_buffer = Buffer(opt.buffer_size)
+            self.buffer_size = config['train']['buffer_size']
+            self.fake_X_buffer = Buffer(self.buffer_size)
+            self.fake_Y_buffer = Buffer(self.buffer_size)
             
             # define optimizers and learning rate schedulers
-            self.optim_G = torch.optim.Adam(itertools.chain(self.genG.parameters(), self.genF.parameters()), lr=opt.lr, betas=(opt.beta1, 0.999))
-            self.optim_D = torch.optim.Adam(itertools.chain(self.netD_X.parameters(), self.netD_Y.parameters()), lr=opt.lr, betas=(opt.beta1, 0.999))
+            lr = config['train']['lr']
+            beta1 = config['train']['beta1']
+            self.optim_G = torch.optim.Adam(itertools.chain(self.genG.parameters(), self.genF.parameters()), lr=lr, betas=(beta1, 0.999))
+            self.optim_D = torch.optim.Adam(itertools.chain(self.netD_X.parameters(), self.netD_Y.parameters()), lr=lr, betas=(beta1, 0.999))
             self.optimizers = [self.optim_G, self.optim_D]
 
     def setup_input(self, input : dict):
@@ -114,9 +117,9 @@ class CycleGAN(nn.Module):
     
     def backward_G(self):
         # use options
-        lambda_scaling = self.opt.lambda_scaling
-        lambda_X = self.opt.lambda_X
-        lambda_Y = self.opt.lambda_Y
+        lambda_scaling = self.config['train']['loss']['lambda_scaling']
+        lambda_X = self.config['train']['loss']['lambda_X']
+        lambda_Y = self.config['train']['loss']['lambda_Y']
 
         # implement lambda scaled loss in the future, but for now use 0
         # need something here for identity loss
@@ -160,17 +163,16 @@ class CycleGAN(nn.Module):
         self.optim_D.step()
 
     # utils
-    def general_setup(self, opt):
+    def general_setup(self):
         if self.to_train:
-            self.setup_schedulers(opt)
-        if not self.to_train or opt.continue_train:
-            self.load_networks(opt.load_epoch)
+            self.setup_schedulers()
+        if not self.to_train or self.opt.continue_train:
+            self.load_networks(self.opt.load_epoch)
         
-        print_network(self, opt.verbose)
+        print_network(self, self.opt.verbose)
 
-
-    def setup_schedulers(self, opt):
-        self.schedulers = [init_linear_lr(optimizer, opt.start_epoch, opt.warmup_epochs, opt.decay_epochs) for optimizer in self.optimizers]
+    def setup_schedulers(self):
+        self.schedulers = [init_linear_lr(optimizer, **self.config['train']) for optimizer in self.optimizers]
         
     def update_schedulers(self):
         for scheduler in self.schedulers:

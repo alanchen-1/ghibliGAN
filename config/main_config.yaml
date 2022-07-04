@@ -8,21 +8,23 @@ dataset:
     num_workers: 4
  
 model:
-    verbose: True
     generator:
         num_filters: 64
         num_blocks: 9
         padding: 'reflect'
         norm: 'instance'
-        use_dropout: True
         num_sampling: 2
+        use_dropout: True
         init_type: 'normal'
         init_scale: 0.02
     discriminator:
         num_filters: 64
         num_conv_layers: 3
+        norm: 'instance'
         ker_size: 4
         padding: 1
+        init_type: 'normal'
+        init_scale: 0.02
 
 train:
     save_epoch_freq: 10
@@ -30,8 +32,9 @@ train:
     decay_epochs: 100
     beta1: 0.5
     lr: 0.0002
-    loss_type: 'mse'
     buffer_size: 50
-    lambda_scaling: 0.5
-    lambda_X: 10.0
-    lambda_Y: 10.0
+    loss:
+        loss_type: 'mse'
+        lambda_scaling: 0.5
+        lambda_X: 10.0
+        lambda_Y: 10.0

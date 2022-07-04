@@ -6,7 +6,7 @@ import unittest
 import torch
 import numpy as np
 from models.loss import Loss
-from test_utils import oned_tensor_equals
+from comparisons import oned_tensor_equals
 
 class TestLoss(unittest.TestCase):
     """
