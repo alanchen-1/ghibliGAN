@@ -56,6 +56,7 @@ if __name__ == '__main__':
     print("Total epochs: ", total_epochs)
     for epoch in range(start_epoch, total_epochs + 1):
         for i, data in enumerate(dataloader):
+            print(data['X'].shape)
             model.setup_input(data)
             model.optimize()
             model.update_schedulers()

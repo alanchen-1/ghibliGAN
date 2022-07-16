@@ -81,7 +81,6 @@ class CycleGAN(nn.Module):
         """
         self.real_X = input['X'].to(self.device)
         self.real_Y = input['Y'].to(self.device)
-        self.image_paths = input['X_paths']
     
     def forward(self):
         """
