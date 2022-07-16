@@ -2,25 +2,18 @@
 import sys
 sys.path.append('..')
 
-import unittest
 import torch
 import numpy as np
 from models.loss import Loss
 from comparisons import oned_tensor_equals
 
-class TestLoss(unittest.TestCase):
+def test_get_labels():
     """
-    Test cases for Loss class.
+    Tests the get_labels method.
     """
-    def test_get_labels(self):
-        """
-        Tests the get_labels method.
-        """
-        test = Loss()
-        self.assertTrue(oned_tensor_equals(torch.Tensor(np.ones(64)), test.get_labels(torch.Tensor(np.empty(64)), True)))
-        self.assertTrue(oned_tensor_equals(torch.Tensor(np.zeros(64)), test.get_labels(torch.Tensor(np.empty(64)), False)))
-    
-    # test for computation
+    test = Loss()
+    assert oned_tensor_equals(torch.Tensor(np.ones(64)), test.get_labels(torch.Tensor(np.empty(64)), True))
+    assert oned_tensor_equals(torch.Tensor(np.zeros(64)), test.get_labels(torch.Tensor(np.empty(64)), False))
 
-if __name__ == '__main__':
-    unittest.main()
+# test for computation
+

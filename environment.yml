@@ -4,6 +4,7 @@ channels:
   - defaults
 dependencies:
   - pip=21.2.4
+  - pytest
   - python=3.9.*
   - pytorch=1.11.*
   - pyyaml
