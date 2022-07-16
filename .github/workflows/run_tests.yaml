@@ -15,5 +15,5 @@ jobs:
             - name: Install packages
               run: $CONDA/bin/conda env update -f environment.yml --name base
             - name: Run pytest
-              run: cd test && pytest
+              run: cd test && $CONDA/bin/pytest
 
