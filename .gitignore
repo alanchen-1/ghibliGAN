@@ -2,7 +2,7 @@
 notes.txt
 
 # ignore checkpoints
-*.pth
+checkpoints/*/*.pth
 
 # cache files
 __pycache__/
