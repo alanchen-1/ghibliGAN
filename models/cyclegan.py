@@ -81,6 +81,7 @@ class CycleGAN(nn.Module):
         """
         self.real_X = input['X'].to(self.device)
         self.real_Y = input['Y'].to(self.device)
+        self.image_paths = input['X_paths']
     
     def forward(self):
         """
@@ -238,6 +239,14 @@ class CycleGAN(nn.Module):
         for model_name in self.model_names:
             net = getattr(self, model_name)
             net.eval()
+
+    def test(self, to_return=['real_X', 'fake_Y']):
+        with torch.inference_mode():
+            self.forward()
+            return_dict = OrderedDict()
+            for name in to_return:
+                return_dict[name] = getattr(self, name)
+            return return_dict
     
     def get_losses(self):
         """

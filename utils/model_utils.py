@@ -2,6 +2,8 @@
 from collections import OrderedDict
 import torch.nn as nn
 import os
+from PIL import Image
+import numpy as np
 
 def print_network(net : nn.Module, verbose : bool = True):
     """
@@ -62,4 +64,27 @@ def get_latest_num(checkpoints_dir : str):
                 pass
     return mx
 
+def save_outs(outs : OrderedDict, out_dir : str, save_separate : bool = False, extension : str = 'jpg'):
+    """
+    Concatenates images in order in outs and saves them in a combined graphic.
+    Assumes images have not been touched at all since being returned by the model.
+    For instance, assumes NCHW format and that the values are torch.Tensor.
+    """
+    os.makedirs(out_dir, exist_ok=True)
+    cat_img = None
+    transformed_imgs = []
+    for (_, v) in outs.items():
+        v_transform = np.transpose(v.cpu().float().detach().numpy(), (0, 2, 3, 1))
+        if cat_img is None:
+            cat_img = v_transform
+        else:
+            cat_img = np.concatenate([cat_img, v_transform], 2) # this may need to be checked
+
+        if save_separate:
+            transformed_imgs.append(v_transform)
+    # save the combined image
+    Image.fromarray(cat_img).save(os.path.join(out_dir, f"combined.{extension}"))
+
+    for name, img in zip(outs.keys(), transformed_imgs):
+        Image.fromarray(img).save(os.path.join(out_dir, f"{name}.{extension}"))
 
