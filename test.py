@@ -33,6 +33,8 @@ if __name__ == '__main__':
         num_workers = config['dataset']['num_workers']
     )
     for i, data in enumerate(dataloader):
+        if i + 1 >= opt.num_tests:
+            break
         model.setup_input(data)
         out = model.test() # default is real image and style transferred image
 

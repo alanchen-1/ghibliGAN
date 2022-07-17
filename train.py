@@ -55,6 +55,7 @@ if __name__ == '__main__':
     # main loop
     print("Total epochs: ", total_epochs)
     for epoch in range(start_epoch, total_epochs + 1):
+        print(f"LR: {model.schedulers[0].get_last_lr()}")
         for i, data in enumerate(dataloader):
             model.setup_input(data)
             model.optimize()

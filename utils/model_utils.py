@@ -82,7 +82,7 @@ def save_outs(outs : OrderedDict, out_dir : str, save_separate : bool = False, e
     cat_img = None
     transformed_imgs = []
     for (_, v) in outs.items():
-        v_transform = np.transpose(v.cpu().float().detach().numpy(), (0, 2, 3, 1))
+        v_transform = np.transpose(v.cpu().detach().numpy(), (0, 2, 3, 1))
         if cat_img is None:
             cat_img = v_transform
         else:

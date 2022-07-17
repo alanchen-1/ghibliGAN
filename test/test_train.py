@@ -1,7 +1,7 @@
-import sys
-sys.path.append('..')
 import yaml
 import torch
+import sys
+sys.path.append('..')
 from options.train_options import CycleTrainOptions
 from models.cyclegan import CycleGAN
 from utils.model_utils import print_losses, get_latest_num
@@ -28,6 +28,8 @@ def test_train():
     with open('../config/main_config.yaml', 'r') as file:
         config = yaml.safe_load(file)
     config['train']['start_epoch'] = 1
+    config['train']['warmup_epochs'] = 0
+    config['train']['decay_epochs'] = 1
 
     # create model + dataset
     model = CycleGAN(opt, config)
@@ -43,9 +45,16 @@ def test_train():
             'X_paths' : '',
             'Y_paths' : ''
             }
+    schedulers = model.schedulers
+    init_lr_vals = [scheduler.get_last_lr() for scheduler in schedulers]
     model.setup_input(data)
     model.optimize()
+    model.update_schedulers()
+    lr_vals = [scheduler.get_last_lr() for scheduler in schedulers]
 
     for (_, p0), (name, p1) in zip(initial_params, params):
         # assert that params have changed
         assert not torch.equal(p0.to('cpu'), p1.to('cpu'))
+
+    for prev, new in zip(init_lr_vals, lr_vals):
+        assert not prev == new
