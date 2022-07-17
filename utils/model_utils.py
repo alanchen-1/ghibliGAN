@@ -64,11 +64,19 @@ def get_latest_num(checkpoints_dir : str):
                 pass
     return mx
 
-def save_outs(outs : OrderedDict, out_dir : str, save_separate : bool = False, extension : str = 'jpg'):
+def save_outs(outs : OrderedDict, out_dir : str, save_separate : bool = False, extension : str = 'jpg', save : bool = True):
     """
     Concatenates images in order in outs and saves them in a combined graphic.
     Assumes images have not been touched at all since being returned by the model.
     For instance, assumes NCHW format and that the values are torch.Tensor.
+        Parameters:
+            outs (OrderedDict) : collected ordered image outputs
+            out_dir (str) : where to save the images
+            save_separate (bool) : whether to save all images separately
+            extension (str) : extension to save images with
+            save (bool) : turn saving on or off. useful for testing
+        Returns:
+            cat_img (np.array) : concatenated image, mainly used for testing
     """
     os.makedirs(out_dir, exist_ok=True)
     cat_img = None
@@ -83,8 +91,11 @@ def save_outs(outs : OrderedDict, out_dir : str, save_separate : bool = False, e
         if save_separate:
             transformed_imgs.append(v_transform)
     # save the combined image
-    Image.fromarray(cat_img).save(os.path.join(out_dir, f"combined.{extension}"))
+    if save:
+        Image.fromarray(cat_img).save(os.path.join(out_dir, f"combined.{extension}"))
 
-    for name, img in zip(outs.keys(), transformed_imgs):
-        Image.fromarray(img).save(os.path.join(out_dir, f"{name}.{extension}"))
+        for name, img in zip(outs.keys(), transformed_imgs):
+            Image.fromarray(img).save(os.path.join(out_dir, f"{name}.{extension}"))
+    
+    return cat_img # useful for testing, but not normally used
 
