@@ -14,8 +14,8 @@ def test_get_latest_num_empty():
 
 def test_save_outs():
     img_1 = torch.rand(1, 3, 256, 256)
-    img_2 = torch.rand(1, 3, 256, 256) + 10
-    img_3 = torch.rand(1, 3, 256, 256) + 100
+    img_2 = torch.rand(1, 3, 256, 256)
+    img_3 = torch.rand(1, 3, 256, 256)
     outs = OrderedDict({
             'img_1' : img_1,
             'img_2' : img_2,
@@ -25,6 +25,7 @@ def test_save_outs():
     # check size
     assert np.shape(cat_img) == (1, 256, 256 * 3, 3)
     # check order
-    assert within_bounds(cat_img[:, :, :256, :], 0, 1, hi_inclusive=False)
-    assert within_bounds(cat_img[:, :, 256:512, :], 10, 11, hi_inclusive=False)
-    assert within_bounds(cat_img[:, :, 512:, :], 100, 101, hi_inclusive=False)
+    assert within_bounds(cat_img[:, :, :256, :], 0, 256, hi_inclusive=False)
+    assert within_bounds(cat_img[:, :, 256:512, :], 0, 256, hi_inclusive=False)
+    assert within_bounds(cat_img[:, :, 512:, :], 0, 256, hi_inclusive=False)
+
