@@ -1,4 +1,5 @@
 import yaml
+import os
 import torch
 from options.test_options import CycleTestOptions
 from models.cyclegan import CycleGAN
@@ -12,9 +13,8 @@ if __name__ == '__main__':
     opt.phase = 'test'
     parser.export_options(opt)
 
-    result_dir = os.path.join(opt.result_dir, f"{opt.model_name}_{opt.phase}"),
+    result_dir = os.path.join(opt.result_dir, f"{opt.model_name}_{opt.phase}")
     os.makedirs(result_dir, exist_ok=True)
-    print(f"Saving images in {result_dir}")
 
     # config params
     with open(opt.config, 'r') as file:
@@ -32,6 +32,8 @@ if __name__ == '__main__':
         shuffle = False,
         num_workers = config['dataset']['num_workers']
     )
+
+    print(f"Saving images in {result_dir}")
     for i, data in enumerate(dataloader):
         if i + 1 >= opt.num_tests:
             break
@@ -39,6 +41,5 @@ if __name__ == '__main__':
         out = model.test() # default is real image and style transferred image
 
         # save in results dir
-
         file_name = os.path.splitext(os.path.basename(model.image_paths[0]))[0]
         save_outs(out, os.path.join(result_dir, file_name), opt.save_separate)

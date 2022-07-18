@@ -1,4 +1,4 @@
-from options import Options
+from .options import Options
 import argparse
 
 class CycleTestOptions(Options):

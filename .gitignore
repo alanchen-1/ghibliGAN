@@ -3,6 +3,7 @@ notes.txt
 
 # ignore checkpoints
 checkpoints/*/*.pth
+checkpoints/*/*.txt
 
 # cache files
 __pycache__/
@@ -10,3 +11,6 @@ __pycache__/
 # ignore big data
 data/videos/
 data/images/
+
+# ignore test results folder
+results/

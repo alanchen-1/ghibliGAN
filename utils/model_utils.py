@@ -82,20 +82,23 @@ def save_outs(outs : OrderedDict, out_dir : str, save_separate : bool = False, e
     cat_img = None
     transformed_imgs = []
     for (_, v) in outs.items():
-        v_transform = np.transpose(v.cpu().detach().numpy(), (0, 2, 3, 1))
-        if cat_img is None:
-            cat_img = v_transform
-        else:
-            cat_img = np.concatenate([cat_img, v_transform], 2) # this may need to be checked
+        v_transform = np.transpose(v.cpu().float().detach().numpy(), (0, 2, 3, 1))
 
+        if v_transform.shape[-1] == 1: # make grayscale into color
+            v_transform = np.tile(v_transform, (1, 1, 1, 3))
+
+        # scale properly
+        v_transform = ((v_transform + 1) / 2.0 * 255.0).astype(np.uint8)
+
+        cat_img = v_transform if cat_img is None else np.concatenate([cat_img, v_transform], 2) # this may need to be checked
         if save_separate:
             transformed_imgs.append(v_transform)
     # save the combined image
     if save:
-        Image.fromarray(cat_img).save(os.path.join(out_dir, f"combined.{extension}"))
+        Image.fromarray(cat_img[0]).save(os.path.join(out_dir, f"combined.{extension}"))
 
         for name, img in zip(outs.keys(), transformed_imgs):
-            Image.fromarray(img).save(os.path.join(out_dir, f"{name}.{extension}"))
+            Image.fromarray(img[0]).save(os.path.join(out_dir, f"{name}.{extension}"))
     
     return cat_img # useful for testing, but not normally used
 

@@ -5,6 +5,7 @@ Rough outline:
 """
 import yaml
 import torch
+import os
 from options.train_options import CycleTrainOptions
 from models.cyclegan import CycleGAN
 from data.dataset import CycleDataset
@@ -29,11 +30,11 @@ if __name__ == '__main__':
     else:
         # do it based on load epoch
         if (opt.load_epoch == 'latest'):
-            start_epoch = get_latest_num(opt.checkpoints_dir)
+            start_epoch = get_latest_num(os.path.join(opt.checkpoints_dir, opt.model_name)) + 1
             pass
         else:
-            start_epoch = int(opt.load_epoch)
-    config['train']['start_epoch'] = start_epoch
+            start_epoch = int(opt.load_epoch) + 1
+    config['train']['start_epoch'] = start_epoch + 1
 
     # create model + dataset
     model = CycleGAN(opt, config)
@@ -49,7 +50,7 @@ if __name__ == '__main__':
     X_size, Y_size = dataset.both_len()
     print(f'Number of X images: {X_size}, Number of Y images: {Y_size}')
     
-    print ("Starting training loop...")
+    print (f"Starting training loop from epoch {start_epoch}...")
     print("Losses printed as [epoch / total epochs] [batch / total batches]")
 
     # main loop
