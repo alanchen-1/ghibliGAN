@@ -54,5 +54,7 @@ class Loss(nn.Module):
                 loss (float) : float value of loss to use in backpropagation
         """
         labels = self.get_labels(predicted, real)
+        if predicted.shape[0] == 0 and self.loss_type == 'mse':
+            raise ZeroDivisionError("Length of predicted tensor is not allowed to be 0 in MSE")
         loss = self.loss(predicted, labels)
         return loss

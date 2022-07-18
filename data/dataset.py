@@ -119,5 +119,3 @@ class CycleDataset(Dataset):
         self.X_images = sorted(image_walk(self.Xdir))
         self.Y_images = sorted(image_walk(self.Ydir))
 
-
-

@@ -14,7 +14,7 @@ model:
         padding: 'reflect'
         norm: 'instance'
         num_sampling: 2
-        use_dropout: True
+        use_dropout: False
         init_type: 'normal'
         init_scale: 0.02
     discriminator:

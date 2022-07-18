@@ -115,6 +115,7 @@ def init_patch_discriminator(in_channels : int, num_filters : int = 64, num_conv
 def init_linear_lr(optimizer : torch.optim, start_epoch : int, warmup_epochs : int, decay_epochs : int, **kwargs):
     """
     Simple linear learning rate scheduler.
+    Holds lr constant for <warmup_epochs>, then linearly decays to 0 over the next <decay_epochs>.
         Parameters:
             optimizer (torch.optim) : optimizer to add LR to
             start_epoch (int) : starting epoch (used to continue training a model)
@@ -131,6 +132,7 @@ def init_linear_lr(optimizer : torch.optim, start_epoch : int, warmup_epochs : i
             Returns:
                 (float) : learning rate multiplier at that epoch (linearly decays)
         """
-        return 1.0 - max(0.0, (start_epoch + epoch - warmup_epochs)) / float(decay_epochs)
+        lam = 1.0 - max(0.0, (start_epoch + epoch - warmup_epochs)) / float(decay_epochs + 1) # add one to make sure there is never an epoch with 0 lr
+        return lam
     lr_schedule = lr_scheduler.LambdaLR(optimizer, multiplier)
     return lr_schedule

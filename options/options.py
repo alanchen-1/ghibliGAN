@@ -57,7 +57,11 @@ class Options():
             string += f'{option} : {value}\n'
         string += '\n'
         print(string)
-        export_dir = os.path.join(opt.checkpoints_dir, opt.model_name)
+        if opt.phase == 'train' or opt.phase is None:
+            export_dir = os.path.join(opt.checkpoints_dir, opt.model_name)
+        elif opt.phase == 'test':
+            export_dir = os.path.join(opt.result_dir, f"{opt.model_name}_test")
+
         if not os.path.isdir(export_dir):
             os.makedirs(export_dir)
         filename = os.path.join(export_dir, f'{opt.phase}_options.txt')
