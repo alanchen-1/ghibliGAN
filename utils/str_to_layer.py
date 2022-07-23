@@ -1,5 +1,7 @@
 import torch.nn as nn
-def create_norm(norm : str):
+
+
+def create_norm(norm: str):
     """
     Converts a norm string/name to a nn.Module layer.
         Parameters:
@@ -16,7 +18,8 @@ def create_norm(norm : str):
     else:
         raise NotImplementedError(f'{norm} normalization not supported')
 
-def create_padding(padding : str):
+
+def create_padding(padding: str):
     """
     Converts a padding to a layer.
         Parameters:
