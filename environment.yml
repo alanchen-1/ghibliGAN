@@ -12,3 +12,4 @@ dependencies:
   - torchvision=0.12.*
   - pip:
     - scenedetect
+    - flake8

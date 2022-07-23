@@ -27,7 +27,7 @@ model:
         init_scale: 0.02
 
 train:
-    save_epoch_freq: 10
+    save_epoch_freq: 50
     warmup_epochs: 100
     decay_epochs: 100
     beta1: 0.5
