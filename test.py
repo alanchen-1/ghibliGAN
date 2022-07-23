@@ -4,7 +4,7 @@ import torch
 from options.test_options import CycleTestOptions
 from models.cyclegan import CycleGAN
 from data.dataset import CycleDataset
-from utils.model_utils import print_losses, get_latest_num, save_outs
+from utils.model_utils import save_outs
 
 if __name__ == '__main__':
     # parse options
@@ -25,12 +25,16 @@ if __name__ == '__main__':
     model = CycleGAN(opt, config)
     model.general_setup()
 
-    dataset = CycleDataset(opt.to_train, dataroot=opt.dataroot, **config['dataset'])
+    dataset = CycleDataset(
+        opt.to_train,
+        dataroot=opt.dataroot,
+        **config['dataset']
+    )
     dataloader = torch.utils.data.DataLoader(
         dataset,
-        batch_size = 1,
-        shuffle = False,
-        num_workers = config['dataset']['num_workers']
+        batch_size=1,
+        shuffle=False,
+        num_workers=config['dataset']['num_workers']
     )
 
     print(f"Saving images in {result_dir}")
@@ -38,7 +42,7 @@ if __name__ == '__main__':
         if i + 1 >= opt.num_tests:
             break
         model.setup_input(data)
-        out = model.test() # default is real image and style transferred image
+        out = model.test()  # default is real image and style transferred image
 
         # save in results dir
         file_name = os.path.splitext(os.path.basename(model.image_paths[0]))[0]

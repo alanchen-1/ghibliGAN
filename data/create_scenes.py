@@ -1,9 +1,15 @@
 import sys
-sys.path.append('..')
+import os
+sys.path.append(
+    os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        '..'))
 from scenes import Scenes
 from options.scene_options import SceneOptions
 
-# to run, use python create_scenes.py --video_path <video_path> --video_name <video_name> 
+# to run, use
+#   `python create_scenes.py --video_path <video_path> \
+#       --video_name <video_name>
 # and of course, include any other extra arguments
 
 parser = SceneOptions()

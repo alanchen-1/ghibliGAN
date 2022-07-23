@@ -3,11 +3,16 @@ from scenedetect.scene_manager import SceneManager, save_images
 from scenedetect.detectors.content_detector import ContentDetector
 import os
 
+
 class Scenes():
     """
     Scene detector class of a video.
     """
-    def __init__(self, video_path : str, video_name : str, threshold : float = 30.0):
+    def __init__(
+            self,
+            video_path: str,
+            video_name: str,
+            threshold: float = 30.0):
         """
         Constructor for scene detector class.
             Parameters:
@@ -27,10 +32,13 @@ class Scenes():
 
         self.scene_list = self.scene_manager.get_scene_list()
 
-    def save_scenes(self, num_images : int = 1, output_dir : str = './images/'):
+    def save_scenes(
+            self,
+            num_images: int = 1,
+            output_dir: str = './images/') -> None:
         """
         Saves <num_images> scenes of a video.
-            Parameters: 
+            Parameters:
                 num_images (int) : number of images
                 output_dir (str) : output directory
         """
@@ -38,6 +46,9 @@ class Scenes():
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir)
 
-        save_images(self.scene_list, self.video_manager, num_images=num_images,
-        output_dir=output_dir)
-
+        save_images(
+            self.scene_list,
+            self.video_manager,
+            num_images=num_images,
+            output_dir=output_dir
+        )

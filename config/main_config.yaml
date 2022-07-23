@@ -1,6 +1,6 @@
 dataset:
     batch_size: 1
-    in_order: True
+    in_order: False
     scale_size: 286
     crop_size: 256
     in_channels: 3

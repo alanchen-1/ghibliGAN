@@ -30,8 +30,9 @@ if __name__ == '__main__':
     else:
         # do it based on load epoch
         if (opt.load_epoch == 'latest'):
-            start_epoch = get_latest_num(os.path.join(opt.checkpoints_dir, opt.model_name)) + 1
-            pass
+            start_epoch = get_latest_num(
+                os.path.join(opt.checkpoints_dir, opt.model_name)
+            ) + 1
         else:
             start_epoch = int(opt.load_epoch) + 1
     config['train']['start_epoch'] = start_epoch + 1
@@ -39,18 +40,22 @@ if __name__ == '__main__':
     # create model + dataset
     model = CycleGAN(opt, config)
     model.general_setup()
-    dataset = CycleDataset(opt.to_train, dataroot=opt.dataroot, **config['dataset'])
+    dataset = CycleDataset(
+        opt.to_train,
+        dataroot=opt.dataroot,
+        **config['dataset']
+    )
     dataloader = torch.utils.data.DataLoader(
         dataset,
-        batch_size = config['dataset']['batch_size'],
-        shuffle = not(config['dataset']['in_order']),
-        num_workers = config['dataset']['num_workers']
+        batch_size=config['dataset']['batch_size'],
+        shuffle=not(config['dataset']['in_order']),
+        num_workers=config['dataset']['num_workers']
     )
     max_size = len(dataloader)
     X_size, Y_size = dataset.both_len()
     print(f'Number of X images: {X_size}, Number of Y images: {Y_size}')
-    
-    print (f"Starting training loop from epoch {start_epoch}...")
+
+    print(f"Starting training loop from epoch {start_epoch}...")
     print("Losses printed as [epoch / total epochs] [batch / total batches]")
 
     # main loop
@@ -61,9 +66,9 @@ if __name__ == '__main__':
             model.setup_input(data)
             model.optimize()
             model.update_schedulers()
-            losses = model.get_losses() # ordered dict
+            losses = model.get_losses()  # ordered dict
             print_losses(losses, epoch, total_epochs, i + 1, max_size)
-        
+
         if (epoch % save_epoch_freq == 0) or (epoch == total_epochs):
             # save version with latest and also with epoch num
             print(f"Saving models at end of epoch {epoch}")
