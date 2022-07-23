@@ -7,6 +7,7 @@ checkpoints/*/*.txt
 
 # cache files
 __pycache__/
+.vscode/
 
 # ignore big data
 data/videos/
