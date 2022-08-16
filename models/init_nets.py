@@ -8,7 +8,11 @@ from models.blocks import ResNetGenerator, PatchDiscriminator
 from utils.str_to_layer import create_norm
 
 
-def init_params(network: nn.Module, init_type: str, init_scale: float) -> None:
+def init_params(
+    network: nn.Module,
+    init_type: str,
+    init_scale: float = 0.02
+) -> None:
     """
     Initializes the weights and biases of the network.
         Parameters:
@@ -17,32 +21,32 @@ def init_params(network: nn.Module, init_type: str, init_scale: float) -> None:
             init_scale (float) : initialization scale
                 (variance for norm, gain for xavier)
     """
-    def init_params_helper(model: nn.Module):
+    def init_params_helper(m: nn.Module):
         """
         Helper to apply to the model.
             Parameters:
                 model (nn.Module) : network/layer to apply to
         """
-        classname = model.__class__.__name__
-        if hasattr(model, 'weight') and (
+        classname = m.__class__.__name__
+        if hasattr(m, 'weight') and (
             classname.find('Conv') != -1 or classname.find('Linear') != -1
         ):
             if init_type == 'normal':
-                init.normal_(model.weight.data, 0.0, init_scale)
+                init.normal_(m.weight.data, 0.0, init_scale)
             elif init_type == 'xavier':
-                init.xavier_normal_(model.weight.data, gain=init_scale)
+                init.xavier_normal_(m.weight.data, gain=init_scale)
             elif init_type == 'kaiming':
-                init.kaiming_normal_(model.weight.data, a=0, mode='fan_in')
+                init.kaiming_normal_(m.weight.data, a=0, mode='fan_in')
             else:
                 raise NotImplementedError(
                     f'{type} initialization not implemented'
                 )
             # init bias to 0 if has bias
-            if hasattr(model, 'bias') and model.bias is not None:
-                init.constant_(model.bias.data, 0.0)
+            if hasattr(m, 'bias') and m.bias is not None:
+                init.constant_(m.bias.data, 0.0)
         elif classname.find('BatchNorm2d') != -1:
-            init.normal_(model.weight.data, 1.0, init_scale)
-            init.constant_(model.bias.data, 0.0)
+            init.normal_(m.weight.data, 1.0, init_scale)
+            init.constant_(m.bias.data, 0.0)
     # apply to each layer in the network
     network.apply(init_params_helper)
 
@@ -64,7 +68,10 @@ def add_device(network: nn.Module, use_gpu: bool = True) -> nn.Module:
         use_gpu and torch.cuda.is_available()
     ) else "cpu")
     network.to(device)
-    return network
+    if use_gpu:
+        return torch.nn.DataParallel(network, [0])
+    else:
+        return network
 
 
 def init_model(
@@ -200,8 +207,9 @@ def init_linear_lr(
                     (linearly decays)
         """
         # add one to make sure there is never an epoch with 0 lr
-        lam = 1.0 - max(0.0, (start_epoch + epoch - warmup_epochs)) / \
-            float(decay_epochs + 1)
+        lam = 1.0 - max(
+            0.0, start_epoch + epoch - warmup_epochs
+        ) / float(decay_epochs + 1)
         return lam
-    lr_schedule = lr_scheduler.LambdaLR(optimizer, multiplier)
+    lr_schedule = lr_scheduler.LambdaLR(optimizer, lr_lambda=multiplier)
     return lr_schedule

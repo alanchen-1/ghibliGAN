@@ -25,7 +25,7 @@ if __name__ == '__main__':
     decay_epochs = config['train']['decay_epochs']
     save_epoch_freq = config['train']['save_epoch_freq']
     total_epochs = warmup_epochs + decay_epochs
-    if not(opt.continue_train):
+    if not (opt.continue_train):
         start_epoch = 1
     else:
         # do it based on load epoch
@@ -48,7 +48,7 @@ if __name__ == '__main__':
     dataloader = torch.utils.data.DataLoader(
         dataset,
         batch_size=config['dataset']['batch_size'],
-        shuffle=not(config['dataset']['in_order']),
+        shuffle=not (config['dataset']['in_order']),
         num_workers=config['dataset']['num_workers']
     )
     max_size = len(dataloader)

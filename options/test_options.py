@@ -18,7 +18,7 @@ class CycleTestOptions(Options):
                 parser (argparse.ArgumentParser) : updated parser
         """
         parser = Options.initialize(self, parser)
-        parser.add_argument('--num_tests', default=float('inf'),
+        parser.add_argument('--num_tests', type=int, default=float('inf'),
                             help="max number of images to run on")
         parser.add_argument('--result_dir', default='./results',
                             help='result directory')

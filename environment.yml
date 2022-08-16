@@ -3,13 +3,13 @@ channels:
   - pytorch
   - defaults
 dependencies:
-  - pip=21.2.4
+  - cudatoolkit
+  - pip>=21.*
   - pytest
   - python=3.9.*
-  - pytorch=1.11.*
+  - pytorch>=1.11.*
   - pyyaml
-  - scipy=1.7.3
-  - torchvision=0.12.*
+  - torchvision>=0.12.*
   - pip:
     - scenedetect
     - flake8

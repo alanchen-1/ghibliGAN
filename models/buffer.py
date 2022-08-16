@@ -42,7 +42,8 @@ class Buffer():
                 continue
 
             # select random
-            p = random.random()
+            p = random.uniform(0, 1)
+            print(p)
             if p < 0.5:
                 # add random real tensor and replace it in the buffer so that
                 # D still only sees each image once

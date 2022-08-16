@@ -70,7 +70,7 @@ class ResNetBlock(nn.Module):
                 bias=bias),
             norm_layer(dimension)])
 
-        self.res_block = nn.Sequential(*block)
+        self.conv_block = nn.Sequential(*block)
 
     def forward(self, x):
         """
@@ -80,7 +80,7 @@ class ResNetBlock(nn.Module):
             Returns:
                 output : output of network
         """
-        output = self.res_block(x) + x  # add skip connection
+        output = self.conv_block(x) + x  # add skip connection
         return output
 
 
@@ -127,7 +127,6 @@ class ResNetGenerator(nn.Module):
                 in_channels,
                 num_filters,
                 kernel_size=7,
-                stride=1,
                 padding=0,
                 bias=use_bias
             ),
@@ -242,7 +241,6 @@ class PatchDiscriminator(nn.Module):
         super(PatchDiscriminator, self).__init__()
 
         # only need bias if using InstanceNorm
-        # idea taken from original CycleGAN repository
         bias = (norm_layer == nn.InstanceNorm2d)
 
         block = [
@@ -308,8 +306,8 @@ class PatchDiscriminator(nn.Module):
             Returns:
                 output : value after x is forwarded through the network
         """
-        output = self.model(x)
-        return output
+        return self.model(x)
+
 
 # test stuff
 # testNet = ResNetBlock(64, dropout=False, bias=True, norm='instance')

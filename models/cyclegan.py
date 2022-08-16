@@ -92,13 +92,13 @@ class CycleGAN(nn.Module):
             self.fake_Y_buffer = Buffer(self.buffer_size)
 
             # define optimizers and learning rate schedulers
-            lr = config['train']['lr']
-            beta1 = config['train']['beta1']
+            lr = float(config['train']['lr'])
+            beta1 = float(config['train']['beta1'])
             self.optim_G = torch.optim.Adam(itertools.chain(
                 self.genG.parameters(), self.genF.parameters()
             ), lr=lr, betas=(beta1, 0.999))
             self.optim_D = torch.optim.Adam(itertools.chain(
-                self.netD_X.parameters(), self.netD_Y.parameters()
+                self.netD_Y.parameters(), self.netD_X.parameters()
             ), lr=lr, betas=(beta1, 0.999))
             self.optimizers = [self.optim_G, self.optim_D]
 
@@ -111,6 +111,7 @@ class CycleGAN(nn.Module):
         self.real_X = input['X'].to(self.device)
         self.real_Y = input['Y'].to(self.device)
         self.image_paths = input['X_paths']
+        self.y_path = input['Y_paths']
 
     def forward(self):
         """
@@ -144,7 +145,7 @@ class CycleGAN(nn.Module):
                 loss : calculated loss gradients
         """
         # run on real dataset
-        predict_real = discriminator(real.detach())
+        predict_real = discriminator(real)
         loss_real = self.loss_func(predict_real, True)
         # run on fake generated (detach from device)
         predict_fake = discriminator(fake.detach())
@@ -152,6 +153,7 @@ class CycleGAN(nn.Module):
         # sum and calc gradient
         total_loss = (loss_real + loss_fake) * factor
         total_loss.backward()
+
         return total_loss
 
     def backward_D_X(self):
@@ -183,6 +185,7 @@ class CycleGAN(nn.Module):
             self.identity_loss_X = self.loss_identity(
                 identity_output_Y, self.real_Y
             ) * lambda_scaling * lambda_Y
+
             identity_output_X = self.genF(self.real_X)  # lives in X
             self.identity_loss_Y = self.loss_identity(
                 identity_output_X, self.real_X
@@ -219,17 +222,25 @@ class CycleGAN(nn.Module):
         self.forward()
 
         # optimize generators
+        self.set_requires_grad([self.netD_X, self.netD_Y], False)
         self.optim_G.zero_grad()
         self.backward_G()
         self.optim_G.step()
 
         # optimize discriminators
+        self.set_requires_grad([self.netD_X, self.netD_Y], True)
         self.optim_D.zero_grad()
-        self.backward_D_X()
         self.backward_D_Y()
+        self.backward_D_X()
         self.optim_D.step()
 
     # utils
+    def set_requires_grad(self, nets, requires_grad):
+        for net in nets:
+            if net is not None:
+                for param in net.parameters():
+                    param.requires_grad = requires_grad
+
     def general_setup(self):
         """
         Sets up model's networks and optimizers according to whether

@@ -7,7 +7,7 @@ import random
 IMAGE_EXTENSIONS = ['.png', '.jpg']
 
 
-def image_walk(root_dir: str) -> list[str]:
+def image_walk(root_dir: str) -> list:
     """
     Gets all images recursively in the root directory using os.walk().
         Parameters:
@@ -75,7 +75,7 @@ class CycleDataset(Dataset):
         self.transform_X = self.get_transforms(in_channels == 1)
         self.transform_Y = self.get_transforms(out_channels == 1)
 
-    def get_transforms(self, grayscale: bool = False) -> list[transforms]:
+    def get_transforms(self, grayscale: bool = False) -> list:
         """
         Gets transforms based on the crop size and the channels of the domains.
             Parameters:
@@ -93,12 +93,12 @@ class CycleDataset(Dataset):
             transforms.ToTensor(),
         ]
         if grayscale:
-            transform = [transforms.Grayscale(1)]
-            + core_transforms
-            + [transforms.Normalize((0.5,), (0.5,))]
+            transform = [transforms.Grayscale(1)] + \
+                core_transforms + \
+                [transforms.Normalize((0.5,), (0.5,))]
         else:
-            transform = core_transforms
-            + [transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+            transform = core_transforms + \
+                [transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
         return transforms.Compose(transform)
 
     def __getitem__(self, index: int) -> dict:
@@ -114,7 +114,7 @@ class CycleDataset(Dataset):
         if self.in_order:
             Y_img_path = self.Y_images[index % self.Ysize]
         else:
-            Y_img_path = self.Y_images[random.randint(0, self.Ysize)]
+            Y_img_path = self.Y_images[random.randint(0, self.Ysize - 1)]
 
         X_img = Image.open(X_img_path).convert('RGB')
         Y_img = Image.open(Y_img_path).convert('RGB')

@@ -47,7 +47,7 @@ def print_losses(
 
     to_print = f"Losses [{epoch} / {total_epochs}] [{iters} / {total_iters}]:"
     for key in subset:
-        to_print += f" [{key} : {losses[key]:.4f}] "
+        to_print += f" [{key} : {losses[key]:.7f}] "
 
     print(to_print)
 

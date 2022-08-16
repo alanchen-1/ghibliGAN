@@ -14,8 +14,8 @@ class Loss(nn.Module):
     def __init__(
         self,
         loss_type: str = 'mse',
-        real_label: float = 1.0,
-        fake_label: float = 0.0
+        targ_real_label: float = 1.0,
+        targ_fake_label: float = 0.0
     ):
         """
         Constructor for Loss class.
@@ -25,8 +25,8 @@ class Loss(nn.Module):
                 fake_label (bool) : fake label
         """
         super(Loss, self).__init__()
-        self.register_buffer('real_label', torch.tensor(real_label))
-        self.register_buffer('fake_label', torch.tensor(fake_label))
+        self.register_buffer('real_label', torch.tensor(targ_real_label))
+        self.register_buffer('fake_label', torch.tensor(targ_fake_label))
         self.loss_type = loss_type
         if loss_type == 'mse':
             self.loss = nn.MSELoss()

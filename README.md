@@ -2,6 +2,10 @@
 
 CycleGAN implementation trained to "Ghibli"-ize real landscapes
 
+An attempt using style transfer to capture the dream-esque art style of Studio Ghibli films. Part of an ongoing personal interest in whether art is unique to humans and a larger discussion on the core question: are humans are machines?
+
+[Demo](https://huggingface.co/spaces/alanchen-1/ghibliGAN)
+
 ## Requirements
 I've only tested this thoroughly on a WSL system running Ubuntu 20.04. I loosened the package requirements in the `environment.yml` file, so it should work on every other platform.
 
@@ -21,8 +25,9 @@ conda activate ghibli
 Other forms of installation (`pip`, Docker) are on the longlist of things to add.
 
 ## Quick Inference
-<UNDER CONSTRUCTION>
-Pretrained checkpoints and dataset are coming soon.
+Pretrained checkpoints and dataset are here! Check them out [here](https://drive.google.com/drive/folders/1EnFXBMT7LE9JOtJ9gipKVGZF6lQfAZj1?usp=sharing).
+
+Use with `test.py`.
 
 ## Training
 If you would like to retrain the model either on the dataset I used or a different dataset, `train.py` is provided for this. Run
@@ -51,7 +56,7 @@ The `real2ghilbli` dataset (~900 images) was taken from 9 Ghibli movies. These m
 
 The `real2shinkai` dataset (~300 images) was taken from 3 Makoto Shinkai films - Your Name, Weathering with You, and Garden of Words. This was to test if there was any big performance drop when using a much smaller dataset.
 
-The real data (`trainX` and `testX`) are ~6000 landscapes downloaded from Flickr stolen from the original CycleGAN repository.
+The real data (`trainX` and `testX`) are ~2000 landscapes downloaded from Flickr stolen from the original CycleGAN repository.
 
 ## Misc
 All code adheres to PEP8 style guidelines (as checked by `flake8`). Most of the non-model-architecture code is unittested in `test/` - a lot of AI just architecture constructors so its harder to test those. 
@@ -59,3 +64,7 @@ All code adheres to PEP8 style guidelines (as checked by `flake8`). Most of the 
 CycleGAN is a pretty outdated architecture, as there exist models these days that can learn a style from a single image (StyleGAN2 is really powerful), but I don't have the GPU power to train models of that caliber right now - my poor laptop :sob:. Additionally, most of the values for the hyperparameters I used were just taken from Section 4 and the Appendix of the original paper.
 
 This is probably my biggest solo Python project to date (~2500 lines). I made a significant effort to use good software principles like OOP, docs, testing (even unit testing training process for model, not usually done), CI/CD, etc. Was it worth it though...
+
+Todo:
+- Port Gradio demo to ONNX
+- Checkpoints for Shinkai dataset (maybe no time to do this, going back to school soon)

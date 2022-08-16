@@ -39,7 +39,7 @@ if __name__ == '__main__':
 
     print(f"Saving images in {result_dir}")
     for i, data in enumerate(dataloader):
-        if i + 1 >= opt.num_tests:
+        if i > opt.num_tests:
             break
         model.setup_input(data)
         out = model.test()  # default is real image and style transferred image
